@@ -33,8 +33,8 @@ public class TripController {
     }
 
     @GetMapping("/me")
-    public ApiResponse<?> getMyTrip(@AuthenticationPrincipal Long memberId) {
-        var response = tripService.getMyTrip(memberId);
+    public ApiResponse<?> getMyTrips(@AuthenticationPrincipal Long memberId) {
+        var response = tripService.getMyTrips(memberId);
         return ApiResponse.success(response);
     }
 
@@ -63,13 +63,13 @@ public class TripController {
         return ApiResponse.success(null);
     }
 
-    @GetMapping("/{tripId}/timeline")
-    public ApiResponse<?> getTimeline(
-            @AuthenticationPrincipal Long memberId,
-            @PathVariable Long tripId) {
-        var response = tripService.getTimeline(memberId, tripId);
-        return ApiResponse.success(response);
-    }
+//    @GetMapping("/{tripId}/timeline")
+//    public ApiResponse<?> getTimeline(
+//            @AuthenticationPrincipal Long memberId,
+//            @PathVariable Long tripId) {
+//        var response = tripService.getTimeline(memberId, tripId);
+//        return ApiResponse.success(response);
+//    }
 
     public record TripCreateRequest(
             String countryCode,

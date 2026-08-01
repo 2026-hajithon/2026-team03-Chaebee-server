@@ -22,20 +22,17 @@ public class DiscoveryController {
 
     // 발견 등록
     @PostMapping
-    public ResponseEntity<ApiResponse<DiscoveryRes.DiscoveryResponse>> createDiscovery(
+    public ApiResponse<DiscoveryRes.DiscoveryResponse> createDiscovery(
             @AuthenticationPrincipal Long memberId,
             @RequestBody @Valid DiscoveryReq.CreateDiscoveryRequest request
     ) {
-        DiscoveryRes.DiscoveryResponse response = discoveryService.createDiscovery(memberId, request);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ApiResponse.success(discoveryService.createDiscovery(memberId, request));
     }
 
-
-    // 타임라인 구성 (ApiResponse 적용)
+    // 타임라인 구성
     @GetMapping("/trips/{tripId}/timeline")
-    public ResponseEntity<ApiResponse<DiscoveryRes.TimelineResponse>> getTimeline(@PathVariable Long tripId) {
-        DiscoveryRes.TimelineResponse response = discoveryService.getTimeline(tripId);
-        return ResponseEntity.ok(ApiResponse.success(response)); // 💡 여기서 한 번 감싸주기만 하면 끝!
+    public ApiResponse<DiscoveryRes.TimelineResponse> getTimeline(@PathVariable Long tripId) {
+        return ApiResponse.success(discoveryService.getTimeline(tripId));
     }
 
 

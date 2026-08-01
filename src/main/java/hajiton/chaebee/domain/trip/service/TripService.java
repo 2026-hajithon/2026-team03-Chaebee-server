@@ -85,24 +85,26 @@ public class TripService {
         );
     }
 
+    //유저 여행 모두 가져오기 (내림차순 정렬)
     @Transactional(readOnly = true)
-    public TripResponse getMyTrip(Long memberId) {
-        // 본인의 진행 중인 여행 하나를 가져온다고 가정
-        Trip trip = tripRepository.findFirstByMemberIdOrderByDepartureDateDesc(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("등록된 여행이 없습니다. (TRIP_NOT_FOUND)"));
+    public List<TripResponse> getMyTrips(Long memberId) {
+        List<Trip> trips = tripRepository.findAllByMemberIdOrderByDepartureDateDesc(memberId);
 
-        long dDay = ChronoUnit.DAYS.between(LocalDateTime.now(), trip.getDepartureDate());
-
-        return new TripResponse(
-                trip.getId(),
-                trip.getCountryCode().name(),
-                trip.getCityCode().name(),
-                trip.getDepartureDate(),
-                trip.getArrivalDate(),
-                trip.getHasEsim(),
-                trip.getHasCash(),
-                (int) dDay
-        );
+        return trips.stream()
+                .map(trip -> {
+                    long dDay = ChronoUnit.DAYS.between(LocalDateTime.now(), trip.getDepartureDate());
+                    return new TripResponse(
+                            trip.getId(),
+                            trip.getCountryCode().name(),
+                            trip.getCityCode().name(),
+                            trip.getDepartureDate(),
+                            trip.getArrivalDate(),
+                            trip.getHasEsim(),
+                            trip.getHasCash(),
+                            (int) dDay
+                    );
+                })
+                .toList();
     }
 
     @Transactional
@@ -140,22 +142,22 @@ public class TripService {
         // TODO: 요청 DTO 기반 필드 수정 로직 (날짜 변경 등)
     }
 
-    @Transactional(readOnly = true)
-    public Object getTimeline(Long memberId, Long tripId) {
-        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new IllegalArgumentException("TRIP_NOT_FOUND"));
-        if (!trip.getMember().getId().equals(memberId)) throw new IllegalArgumentException("FORBIDDEN");
-
-        List<ChecklistItem> items = checklistItemRepository.findByTripIdOrderByDDayDesc(tripId);
-        
-        // 간단히 항목 목록만 반환 (추후 D-Day별 그룹핑 로직 필요)
-        return items.stream().map(item -> new ChecklistItemDto(
-                item.getId(),
-                item.getTag().name(),
-                item.getTag().getDescription(),
-                item.getDDay(),
-                item.getIsChecked()
-        )).toList();
-    }
+//    @Transactional(readOnly = true)
+//    public Object getTimeline(Long memberId, Long tripId) {
+//        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new IllegalArgumentException("TRIP_NOT_FOUND"));
+//        if (!trip.getMember().getId().equals(memberId)) throw new IllegalArgumentException("FORBIDDEN");
+//
+//        List<ChecklistItem> items = checklistItemRepository.findByTripIdOrderByDDayDesc(tripId);
+//
+//        // 간단히 항목 목록만 반환 (추후 D-Day별 그룹핑 로직 필요)
+//        return items.stream().map(item -> new ChecklistItemDto(
+//                item.getId(),
+//                item.getTag().name(),
+//                item.getTag().getDescription(),
+//                item.getDDay(),
+//                item.getIsChecked()
+//        )).toList();
+//    }
 
     // Response DTO
     public record TripResponse(
