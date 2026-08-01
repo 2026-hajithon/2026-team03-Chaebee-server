@@ -40,6 +40,14 @@ public class DiscoveryController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @Operation(summary = "내 발견 목록 조회", description = "내가 등록한 모든 발견 목록을 최신순으로 조회합니다.")
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<?>> getMyDiscoveries(
+            @AuthenticationPrincipal Long memberId) {
+        var response = discoveryService.getMyDiscoveries(memberId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @Operation(summary = "발견 상세 조회", description = "특정 발견의 상세 정보를 조회합니다.")
     @GetMapping("/{discoveryId}")
     public ResponseEntity<ApiResponse<?>> getDiscovery(

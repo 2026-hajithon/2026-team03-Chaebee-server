@@ -31,4 +31,7 @@ public interface DiscoveryRepository extends JpaRepository<Discovery, Long> {
     @Query(value = "SELECT d FROM Discovery d JOIN FETCH d.trip t JOIN FETCH d.member m",
            countQuery = "SELECT count(d) FROM Discovery d")
     Page<Discovery> findAllWithTripAndMember(Pageable pageable);
+
+    @Query("SELECT d FROM Discovery d JOIN FETCH d.trip t JOIN FETCH d.member m WHERE d.member.id = :memberId ORDER BY d.createdAt DESC")
+    java.util.List<Discovery> findAllByMemberIdOrderByCreatedAtDesc(@Param("memberId") Long memberId);
 }

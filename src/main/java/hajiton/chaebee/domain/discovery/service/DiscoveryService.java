@@ -134,6 +134,25 @@ public class DiscoveryService {
     }
 
     /**
+     * 내 발견 목록 전체 조회 (최신순)
+     */
+    @Transactional(readOnly = true)
+    public List<DiscoveryRes.DiscoveryListItemResponse> getMyDiscoveries(Long memberId) {
+        List<Discovery> discoveries = discoveryRepository.findAllByMemberIdOrderByCreatedAtDesc(memberId);
+        
+        return discoveries.stream()
+                .map(d -> new DiscoveryRes.DiscoveryListItemResponse(
+                        d.getId(),
+                        d.getTrip().getCountryCode().name(),
+                        d.getTrip().getCityCode().name(),
+                        d.getTravelType().name(),
+                        d.getMember().getName(),
+                        d.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    /**
      * 발견 상세 조회
      */
     @Transactional(readOnly = true)
@@ -166,7 +185,6 @@ public class DiscoveryService {
                 subDiscoveryResponses
         );
     }
-
     // 타임라인 카드 한 번에 몇 개까지 보여줄지. 국가+태그 조합마다 팁이 많이 쌓일 수 있어서
     // 전체 목록이 아니라 최신순 상위 N개만 잘라서 카드로 노출.
     private static final int TIMELINE_CARD_LIMIT = 5;
