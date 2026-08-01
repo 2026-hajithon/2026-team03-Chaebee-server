@@ -15,13 +15,12 @@ public class MemberController {
     private final MemberService memberService;
 
     // 1.1 소셜 로그인 / 게스트 로그인
-    @PostMapping("/members/login")
+    @PostMapping("/login")
     public MemberRes.Login login(@RequestBody MemberReq.Login request) {
 
         // 공통 응답 객체 없이, 서비스에서 처리한 결과(DTO)를 그대로 프론트에 던져줌!
         return memberService.login(request);
     }
-
 
     public record LoginRequest(LoginProvider provider, String providerToken) {}
 }
