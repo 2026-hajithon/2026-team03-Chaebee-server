@@ -186,7 +186,7 @@ public class DiscoveryService {
         );
     }*/
 
-            
+
     // 타임라인 카드 한 번에 몇 개까지 보여줄지. 국가+태그 조합마다 팁이 많이 쌓일 수 있어서
     // 전체 목록이 아니라 최신순 상위 N개만 잘라서 카드로 노출.
     private static final int TIMELINE_CARD_LIMIT = 5;
@@ -236,5 +236,4 @@ public class DiscoveryService {
 
     // 명세서 기반 DTO
     public record SubDiscoveryRequest(String tag, String content) {}
-
 }
