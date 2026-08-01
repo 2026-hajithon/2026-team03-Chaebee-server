@@ -31,7 +31,7 @@ public class DiscoveryController {
 
     @Operation(summary = "발견 목록 조회", description = "최신순으로 발견 목록을 조회합니다.")
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getDiscoveries(
+    public ResponseEntity<ApiResponse<DiscoveryRes.DiscoveryListResponse>> getDiscoveries(
             @AuthenticationPrincipal Long memberId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -41,7 +41,7 @@ public class DiscoveryController {
 
     @Operation(summary = "내 발견 목록 조회", description = "내가 등록한 모든 발견 목록을 최신순으로 조회합니다.")
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<?>> getMyDiscoveries(
+    public ResponseEntity<ApiResponse<java.util.List<DiscoveryRes.DiscoveryListItemResponse>>> getMyDiscoveries(
             @AuthenticationPrincipal Long memberId) {
         var response = discoveryService.getMyDiscoveries(memberId);
         return ResponseEntity.ok(ApiResponse.success(response));

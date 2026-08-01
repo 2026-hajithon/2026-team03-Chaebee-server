@@ -23,7 +23,7 @@ public class ChecklistController {
 
     @Operation(summary = "체크리스트 상태 변경", description = "특정 체크리스트 항목의 체크 상태를 변경합니다.")
     @PatchMapping("/{checklistItemId}")
-    public ResponseEntity<ApiResponse<?>> updateChecklistItem(
+    public ResponseEntity<ApiResponse<Void>> updateChecklistItem(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long checklistItemId,
             @RequestBody ChecklistReq.UpdateChecklistRequest request) {

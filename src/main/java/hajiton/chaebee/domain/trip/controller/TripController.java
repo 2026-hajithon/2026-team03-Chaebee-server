@@ -43,14 +43,14 @@ public class TripController {
 
     @Operation(summary = "내 모든 여행 조회", description = "내가 등록한 모든 여행 목록을 최신순으로 조회합니다.")
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<?>> getMyTrip(@AuthenticationPrincipal Long memberId) {
+    public ResponseEntity<ApiResponse<java.util.List<TripResponse>>> getMyTrip(@AuthenticationPrincipal Long memberId) {
         var response = tripService.getMyTrip(memberId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @Operation(summary = "여행 삭제", description = "특정 여행을 삭제합니다.")
     @DeleteMapping("/{tripId}")
-    public ResponseEntity<ApiResponse<?>> deleteTrip(
+    public ResponseEntity<ApiResponse<Void>> deleteTrip(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long tripId) {
         tripService.deleteTrip(memberId, tripId);
@@ -59,7 +59,7 @@ public class TripController {
 
     @Operation(summary = "여행 타임라인 조회", description = "특정 여행의 타임라인을 조회합니다.")
     @GetMapping("/{tripId}/timeline")
-    public ResponseEntity<ApiResponse<?>> getTimeline(
+    public ResponseEntity<ApiResponse<hajiton.chaebee.domain.trip.dto.TripRes.TimelineResponse>> getTimeline(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long tripId) {
         var response = tripService.getTimeline(memberId, tripId);

@@ -22,7 +22,7 @@ public class CountryController {
 
     @Operation(summary = "국가 목록 조회", description = "지원하는 전체 국가 목록을 조회합니다.")
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getCountries() {
+    public ResponseEntity<ApiResponse<List<CountryRes.CountryDto>>> getCountries() {
         List<CountryRes.CountryDto> result = Arrays.stream(Country.values())
                 .map(c -> new CountryRes.CountryDto(c.name(), c.getKoreanName(), c.getStatus().name()))
                 .toList();
@@ -31,7 +31,7 @@ public class CountryController {
 
     @Operation(summary = "도시 목록 조회", description = "특정 국가의 지원하는 도시 목록을 조회합니다.")
     @GetMapping("/{countryCode}/cities")
-    public ResponseEntity<ApiResponse<?>> getCities(@PathVariable String countryCode) {
+    public ResponseEntity<ApiResponse<List<CountryRes.CityDto>>> getCities(@PathVariable String countryCode) {
         Country country = Country.valueOf(countryCode);
         List<CountryRes.CityDto> result = Arrays.stream(City.values())
                 .filter(c -> c.getCountry() == country)
