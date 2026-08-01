@@ -1,4 +1,4 @@
-package hajiton.chaebee.config;
+package hajiton.chaebee.global.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
