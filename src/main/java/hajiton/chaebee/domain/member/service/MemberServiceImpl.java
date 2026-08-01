@@ -47,7 +47,7 @@ public class MemberServiceImpl implements MemberService {
         Member member = null;
 
         if (!isGuest) {
-            memberRepository.findByProviderAndProviderId(request.provider(), providerId)
+            member = memberRepository.findByProviderAndProviderId(request.provider(), providerId)
                     .orElse(null);
 
             if (member == null) {
