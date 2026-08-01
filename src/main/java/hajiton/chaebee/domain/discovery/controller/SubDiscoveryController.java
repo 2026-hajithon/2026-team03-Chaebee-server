@@ -37,5 +37,4 @@ public class SubDiscoveryController {
         var response = subDiscoveryService.getDailySubDiscoveries(memberId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
-
 }

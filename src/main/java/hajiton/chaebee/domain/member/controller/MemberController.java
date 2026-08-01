@@ -16,7 +16,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    // 1.1 소셜 로그인 / 게스트 로그인
+    // 소셜 로그인 / 게스트 로그인
     @Operation(summary = "로그인", description = "소셜 로그인 또는 게스트 로그인을 수행합니다.")
     @PostMapping("/login")
     public MemberRes.Login login(@RequestBody MemberReq.Login request) {

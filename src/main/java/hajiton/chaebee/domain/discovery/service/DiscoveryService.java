@@ -139,7 +139,7 @@ public class DiscoveryService {
     @Transactional(readOnly = true)
     public List<DiscoveryRes.DiscoveryListItemResponse> getMyDiscoveries(Long memberId) {
         List<Discovery> discoveries = discoveryRepository.findAllByMemberIdOrderByCreatedAtDesc(memberId);
-        
+
         return discoveries.stream()
                 .map(d -> new DiscoveryRes.DiscoveryListItemResponse(
                         d.getId(),

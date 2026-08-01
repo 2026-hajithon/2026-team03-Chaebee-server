@@ -22,12 +22,11 @@ public class DiscoveryController {
 
     @Operation(summary = "발견 등록", description = "여행의 발견을 등록합니다.")
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createDiscovery(
+    public ResponseEntity<ApiResponse<DiscoveryRes.DiscoveryResponse>> createDiscovery(
             @AuthenticationPrincipal Long memberId,
             @RequestBody @Valid DiscoveryReq.CreateDiscoveryRequest request
     ) {
-        DiscoveryRes.DiscoveryResponse response = discoveryService.createDiscovery(memberId, request);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(discoveryService.createDiscovery(memberId, request)));
     }
 
     @Operation(summary = "발견 목록 조회", description = "최신순으로 발견 목록을 조회합니다.")
