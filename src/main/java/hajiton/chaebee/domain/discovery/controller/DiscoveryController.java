@@ -1,8 +1,13 @@
 package hajiton.chaebee.domain.discovery.controller;
 
+import hajiton.chaebee.domain.discovery.dto.DiscoveryReq;
+import hajiton.chaebee.domain.discovery.dto.DiscoveryRes;
 import hajiton.chaebee.domain.dto.ApiResponse;
 import hajiton.chaebee.domain.discovery.service.DiscoveryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -14,19 +19,17 @@ public class DiscoveryController {
 
     private final DiscoveryService discoveryService;
 
-    @PostMapping
-    public ApiResponse<?> createDiscovery(
-            @AuthenticationPrincipal Long memberId,
-            @RequestBody DiscoveryCreateRequest request) {
 
-        var response = discoveryService.createDiscovery(
-                memberId,
-                request.tripId(),
-                request.tripType(),
-                request.subDiscoveries()
-        );
-        return ApiResponse.success(response);
+    //발견 등
+    @PostMapping
+    public ResponseEntity<DiscoveryRes.DiscoveryResponse> createDiscovery(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody @Valid DiscoveryReq.CreateDiscoveryRequest request
+    ) {
+        DiscoveryRes.DiscoveryResponse response = discoveryService.createDiscovery(memberId, request);
+        return ResponseEntity.ok(response);
     }
+
 
     @GetMapping
     public ApiResponse<?> getDiscoveries(

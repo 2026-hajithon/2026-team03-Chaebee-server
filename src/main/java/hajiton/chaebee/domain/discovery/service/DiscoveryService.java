@@ -1,5 +1,7 @@
 package hajiton.chaebee.domain.discovery.service;
 
+import hajiton.chaebee.domain.discovery.dto.DiscoveryReq;
+import hajiton.chaebee.domain.discovery.dto.DiscoveryRes;
 import hajiton.chaebee.domain.discovery.entity.Discovery;
 import hajiton.chaebee.domain.discovery.entity.SubDiscovery;
 import hajiton.chaebee.domain.discovery.entity.TravelType;
@@ -11,6 +13,7 @@ import hajiton.chaebee.domain.trip.entity.Tag;
 import hajiton.chaebee.domain.trip.entity.Trip;
 import hajiton.chaebee.domain.trip.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,49 +33,48 @@ public class DiscoveryService {
      * 발견 등록 (여행 1개당 1회)
      */
     @Transactional
-    public DiscoveryResponse createDiscovery(Long memberId, Long tripId, String tripTypeStr, List<SubDiscoveryRequest> subDiscoveriesReq) {
+    public DiscoveryRes.DiscoveryResponse createDiscovery(Long memberId, DiscoveryReq.CreateDiscoveryRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보가 없습니다."));
 
-        Trip trip = tripRepository.findById(tripId)
+        Trip trip = tripRepository.findById(request.tripId())
                 .orElseThrow(() -> new IllegalArgumentException("여행 정보가 없습니다. (TRIP_NOT_FOUND)"));
 
         if (!trip.getMember().getId().equals(memberId)) {
             throw new IllegalArgumentException("본인의 여행에만 발견을 등록할 수 있습니다. (FORBIDDEN)");
         }
 
-        if (discoveryRepository.existsByTripId(tripId)) {
+        if (discoveryRepository.existsByTripId(request.tripId())) {
             throw new IllegalStateException("이미 해당 여행에 등록된 발견이 있습니다. (DUPLICATED_DISCOVERY)");
         }
-
-        TravelType travelType = TravelType.valueOf(tripTypeStr);
 
         Discovery discovery = Discovery.builder()
                 .trip(trip)
                 .member(member)
-                .travelType(travelType)
+                .travelType(request.travelType())
                 .build();
 
         Discovery savedDiscovery = discoveryRepository.save(discovery);
 
-        List<SubDiscoveryResponse> subDiscoveryResponses = subDiscoveriesReq.stream().map(req -> {
-            Tag tag = Tag.valueOf(req.tag());
-            SubDiscovery sub = SubDiscovery.builder()
-                    .discovery(savedDiscovery)
-                    .tag(tag)
-                    .content(req.content())
-                    .build();
-            subDiscoveryRepository.save(sub);
-            
-            return new SubDiscoveryResponse(sub.getId(), tag.name(), sub.getContent());
-        }).collect(Collectors.toList());
+        List<DiscoveryRes.SubDiscoveryResponse> subDiscoveryResponses = request.subDiscoveries().stream()
+                .map(req -> {
+                    SubDiscovery sub = SubDiscovery.builder()
+                            .discovery(savedDiscovery)
+                            .tag(req.tag())
+                            .content(req.content())
+                            .build();
+                    subDiscoveryRepository.save(sub);
 
-        return new DiscoveryResponse(
+                    return new DiscoveryRes.SubDiscoveryResponse(sub.getId(), sub.getTag(), sub.getContent());
+                })
+                .collect(Collectors.toList());
+
+        return new DiscoveryRes.DiscoveryResponse(
                 savedDiscovery.getId(),
                 trip.getId(),
                 trip.getCountryCode().name(),
                 trip.getCityCode().name(),
-                savedDiscovery.getTravelType().name(),
+                savedDiscovery.getTravelType(),
                 savedDiscovery.getCreatedAt(),
                 subDiscoveryResponses
         );
