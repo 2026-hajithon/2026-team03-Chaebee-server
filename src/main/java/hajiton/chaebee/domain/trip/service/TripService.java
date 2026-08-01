@@ -39,10 +39,10 @@ public class TripService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        // 1. 기존에 진행 중인 여행이 있는지 확인 (활성화 완료)
+        /*// 1. 기존에 진행 중인 여행이 있는지 확인 (활성화 완료)
         if (tripRepository.existsByMemberIdAndArrivalDateAfter(memberId, LocalDateTime.now())) {
             throw new IllegalStateException("이미 진행중인 여행이 있습니다. (DUPLICATED_ACTIVE_TRIP)");
-        }
+        }*/
 
         Country country = Country.valueOf(countryCodeStr);
         City city = City.valueOf(cityCodeStr);
@@ -95,9 +95,9 @@ public class TripService {
         // 본인의 모든 여행 목록을 출발일 기준 내림차순으로 가져옴
         List<Trip> trips = tripRepository.findAllByMemberIdOrderByDepartureDateDesc(memberId);
 
-        if (trips.isEmpty()) {
+        /*if (trips.isEmpty()) {
             throw new IllegalArgumentException("등록된 여행이 없습니다. (TRIP_NOT_FOUND)");
-        }
+        }*/
 
         return trips.stream().map(trip -> {
             long dDay = ChronoUnit.DAYS.between(LocalDateTime.now(), trip.getDepartureDate());

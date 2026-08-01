@@ -22,19 +22,19 @@ public class SubDiscoveryController {
 
     private final SubDiscoveryService subDiscoveryService;
 
-    @Operation(summary = "서브 발견 조회", description = "조건에 맞는 서브 발견 목록을 조회합니다.")
+    /*@Operation(summary = "서브 발견 조회", description = "조건에 맞는 서브 발견 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<java.util.List<SubDiscoveryService.SubDiscoveryResponse>>> getSubDiscoveries(
             @RequestParam(required = false) String countryCode,
             @RequestParam(required = false) String tag) {
         var response = subDiscoveryService.getSubDiscoveries(countryCode, tag);
         return ResponseEntity.ok(ApiResponse.success(response));
-    }
+    }*/
 
-    @Operation(summary = "일일 서브 발견 조회", description = "매일 새롭게 배정되는 서브 발견을 조회합니다.")
+    /*@Operation(summary = "일일 서브 발견 조회", description = "매일 새롭게 배정되는 서브 발견을 조회합니다.")
     @GetMapping("/daily")
     public ResponseEntity<ApiResponse<SubDiscoveryService.DailySubDiscoveryResponse>> getDailySubDiscoveries(@AuthenticationPrincipal Long memberId) {
         var response = subDiscoveryService.getDailySubDiscoveries(memberId);
         return ResponseEntity.ok(ApiResponse.success(response));
-    }
+    }*/
 }

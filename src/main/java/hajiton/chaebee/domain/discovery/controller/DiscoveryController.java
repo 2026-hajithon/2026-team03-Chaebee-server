@@ -29,7 +29,7 @@ public class DiscoveryController {
         return ResponseEntity.ok(ApiResponse.success(discoveryService.createDiscovery(memberId, request)));
     }
 
-    @Operation(summary = "발견 목록 조회", description = "최신순으로 발견 목록을 조회합니다.")
+    @Operation(summary = "발견 목록 조회", description = "가장 최근에 등록된 발견 10개를 조회합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<DiscoveryRes.DiscoveryListResponse>> getDiscoveries(
             @AuthenticationPrincipal Long memberId,
