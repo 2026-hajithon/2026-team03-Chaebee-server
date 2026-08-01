@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ChecklistItemRepository extends JpaRepository<ChecklistItem, Long> {
     List<ChecklistItem> findByTripIdOrderByDDayDesc(Long tripId);
+
+    List<ChecklistItem> findAllByTripId(Long tripId);
 }

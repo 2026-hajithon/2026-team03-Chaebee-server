@@ -9,15 +9,17 @@ import hajiton.chaebee.domain.discovery.repository.DiscoveryRepository;
 import hajiton.chaebee.domain.discovery.repository.SubDiscoveryRepository;
 import hajiton.chaebee.domain.member.entity.Member;
 import hajiton.chaebee.domain.member.repository.MemberRepository;
-import hajiton.chaebee.domain.trip.entity.Tag;
-import hajiton.chaebee.domain.trip.entity.Trip;
+import hajiton.chaebee.domain.trip.entity.*;
+import hajiton.chaebee.domain.trip.repository.ChecklistItemRepository;
 import hajiton.chaebee.domain.trip.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,10 +30,10 @@ public class DiscoveryService {
     private final SubDiscoveryRepository subDiscoveryRepository;
     private final TripRepository tripRepository;
     private final MemberRepository memberRepository;
+    private final ChecklistItemRepository checklistItemRepository;
 
-    /**
-     * 발견 등록 (여행 1개당 1회)
-     */
+
+    //발견 등록
     @Transactional
     public DiscoveryRes.DiscoveryResponse createDiscovery(Long memberId, DiscoveryReq.CreateDiscoveryRequest request) {
         Member member = memberRepository.findById(memberId)
@@ -51,7 +53,7 @@ public class DiscoveryService {
         Discovery discovery = Discovery.builder()
                 .trip(trip)
                 .member(member)
-                .travelType(request.travelType())
+                .travelType(request.tripType())
                 .build();
 
         Discovery savedDiscovery = discoveryRepository.save(discovery);
@@ -79,6 +81,98 @@ public class DiscoveryService {
                 subDiscoveryResponses
         );
     }
+
+    //타임라인 구성
+    public DiscoveryRes.TimelineResponse getTimeline(Long tripId) {
+        // 1. 여행 정보 및 Enum 데이터 세팅
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행입니다."));
+
+        City city = trip.getCityCode();
+        Country country = city.getCountry(); // City에서 Country 추출
+        LocalDate departureDate = trip.getDepartureDate().toLocalDate();
+        long currentDday = ChronoUnit.DAYS.between(LocalDate.now(), departureDate);
+
+        // 2. 체크리스트 및 팁 데이터 조회
+        List<ChecklistItem> checklists = checklistItemRepository.findAllByTripId(tripId);
+
+        Optional<Discovery> optionalDiscovery = discoveryRepository.findByTripId(tripId);
+        List<SubDiscovery> subDiscoveries = optionalDiscovery
+                .map(discovery -> subDiscoveryRepository.findAllByDiscoveryId(discovery.getId()))
+                .orElse(Collections.emptyList());
+
+        // 3. 상단 헤더 (TripInfo) 조립
+        int totalChecklists = checklists.size();
+        int completedChecklists = (int) checklists.stream().filter(ChecklistItem::getIsChecked).count();
+        int percentage = totalChecklists == 0 ? 0 : (int) Math.round((double) completedChecklists / totalChecklists * 100);
+
+        DiscoveryRes.Progress progress = new DiscoveryRes.Progress(totalChecklists, completedChecklists, percentage);
+        DiscoveryRes.TripInfo tripInfo = new DiscoveryRes.TripInfo(
+                city.getKoreanName() + ", " + country.getKoreanName(), // "로스앤젤레스, 미국"
+                currentDday,
+                progress
+        );
+
+        // 4. 하단 필수 정보 (EssentialInfo) 조립
+        DiscoveryRes.EssentialInfo essentialInfo = new DiscoveryRes.EssentialInfo(
+                country.getPassportValidityRule(),
+                country.getVisaFreeStayDays(),
+                country.getOfficialSiteUrl(),
+                country.getLastUpdatedAt()
+        );
+
+        // 5. D-Day 기준으로 데이터 그룹화
+        Set<Integer> allDDays = new TreeSet<>();
+
+        Map<Integer, List<DiscoveryRes.TimelineChecklist>> checklistMap = checklists.stream()
+                .map(item -> {
+                    Tag tagEnum = item.getTag();
+                    allDDays.add(tagEnum.getDDay());
+                    return new DiscoveryRes.TimelineChecklist(
+                            item.getId(),
+                            tagEnum,
+                            tagEnum.getDescription(), // Tag Enum의 기본 설명 사용
+                            item.getIsChecked()
+                    );
+                })
+                .collect(Collectors.groupingBy(
+                        dto -> dto.tag().getDDay()
+                ));
+
+        Map<Integer, List<DiscoveryRes.TimelineDiscovery>> discoveryMap = subDiscoveries.stream()
+                .map(sub -> {
+                    Tag tagEnum = sub.getTag(); // SubDiscovery의 필드가 Tag 타입인 경우
+                    allDDays.add(tagEnum.getDDay());
+                    return new DiscoveryRes.TimelineDiscovery(
+                            tagEnum,
+                            tagEnum.getDescription(),
+                            sub.getContent()
+                    );
+                })
+                .collect(Collectors.groupingBy(
+                        dto -> dto.tag().getDDay()
+                ));
+
+        // 6. TimelineGroup 리스트 조립
+        List<DiscoveryRes.TimelineGroup> timelineGroups = allDDays.stream()
+                .map(dDay -> {
+                    LocalDate targetDate = departureDate.plusDays(dDay);
+                    return new DiscoveryRes.TimelineGroup(
+                            dDay,
+                            targetDate,
+                            discoveryMap.getOrDefault(dDay, Collections.emptyList()),
+                            checklistMap.getOrDefault(dDay, Collections.emptyList())
+                    );
+                })
+                .toList();
+
+        return new DiscoveryRes.TimelineResponse(tripInfo, timelineGroups, essentialInfo);
+    }
+
+
+
+
+
 
     // 명세서 기반 DTO
     public record SubDiscoveryRequest(String tag, String content) {}

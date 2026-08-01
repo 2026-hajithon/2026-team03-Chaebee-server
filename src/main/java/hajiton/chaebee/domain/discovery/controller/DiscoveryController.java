@@ -20,15 +20,25 @@ public class DiscoveryController {
     private final DiscoveryService discoveryService;
 
 
-    //발견 등
+    //발견 등록
     @PostMapping
-    public ResponseEntity<DiscoveryRes.DiscoveryResponse> createDiscovery(
+    public ResponseEntity<ApiResponse<DiscoveryRes.DiscoveryResponse>> createDiscovery(
             @AuthenticationPrincipal Long memberId,
             @RequestBody @Valid DiscoveryReq.CreateDiscoveryRequest request
     ) {
         DiscoveryRes.DiscoveryResponse response = discoveryService.createDiscovery(memberId, request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+
+    //타임라인 구성
+    @GetMapping("/trips/{tripId}/timeline")
+    public ResponseEntity<DiscoveryRes.TimelineResponse> getTimeline(@PathVariable Long tripId) {
+        DiscoveryRes.TimelineResponse response = discoveryService.getTimeline(tripId);
         return ResponseEntity.ok(response);
     }
+
+
 
 
     @GetMapping
