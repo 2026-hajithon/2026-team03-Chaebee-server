@@ -3,6 +3,8 @@ package hajiton.chaebee.member.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.security.Provider;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,7 +21,7 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private LoginProvider loginProvider; // 로그인 제공자
+    private String provider; // 로그인 제공자
 
     @Column(length = 255)
     private String providerId; // 제공자별 고유 id

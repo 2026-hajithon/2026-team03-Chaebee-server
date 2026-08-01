@@ -7,7 +7,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import hajiton.chaebee.apiPayload.exception.ProjectException;
 
 
-import hajiton.chaebee.domain.member.MemberErrorCode;
+import hajiton.chaebee.member.domain.MemberErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

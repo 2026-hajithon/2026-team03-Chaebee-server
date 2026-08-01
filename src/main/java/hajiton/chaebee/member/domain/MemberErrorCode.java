@@ -1,4 +1,4 @@
-package hajiton.chaebee.domain.member;
+package hajiton.chaebee.member.domain;
 
 import hajiton.chaebee.apiPayload.code.BaseErrorCode;
 import lombok.Getter;

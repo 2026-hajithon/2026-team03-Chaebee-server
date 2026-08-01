@@ -1,103 +1,91 @@
 package hajiton.chaebee.member.service;
 
-import hajiton.chaebee.member.domain.LoginProvider;
 import hajiton.chaebee.member.domain.Member;
+import hajiton.chaebee.member.dto.MemberReq;
+import hajiton.chaebee.member.dto.MemberRes;
 import hajiton.chaebee.member.repository.MemberRepository;
+import hajiton.chaebee.security.GoogleTokenVerifier;
+import hajiton.chaebee.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j; // 👈 롬복 로거 임포트
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j // 👈 로거 활성화
 @Service
 @RequiredArgsConstructor
-public class MemberService {
-    
-    private final MemberRepository memberRepository;
+public class MemberServiceImpl implements MemberService {
 
-    /**
-     * 소셜 로그인 및 게스트 로그인 처리
-     */
+    private final GoogleTokenVerifier googleTokenVerifier;
+    private final MemberRepository memberRepository;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    @Override
     @Transactional
-    public LoginResponse login(LoginProvider provider, String providerToken) {
-        boolean isGuest = (provider == LoginProvider.GUEST);
-        String providerId = null;
-        String name = "게스트";
+    public MemberRes.Login login(MemberReq.Login request) {
+        log.info("[로그인 요청] provider: {}, providerToken 존재 여부: {}",
+                request.provider(), request.providerToken() != null);
+
+        String providerId;
+        String name = "채비유저";
+        boolean isGuest = "GUEST".equals(request.provider());
+
+        // 1. Provider에 따른 토큰 검증 분기 처리
+        if ("GOOGLE".equals(request.provider())) {
+            providerId = googleTokenVerifier.verify(request.providerToken());
+            log.info("[구글 토큰 검증 성공] providerId: {}", providerId);
+        } else if (isGuest) {
+            providerId = null;
+            log.info("[게스트 로그인 처리]");
+        } else {
+            log.error("[지원하지 않는 로그인 방식] provider: {}", request.provider());
+            throw new IllegalArgumentException("아직 지원하지 않는 로그인 방식입니다: " + request.provider());
+        }
+
+        // 2. 신규 가입 여부 플래그 및 기존 회원 조회
+        boolean isNewMember = false;
+        Member member = null;
 
         if (!isGuest) {
-            // TODO: (팀원 구현 부분) 구글/애플 서버와 통신하여 providerToken 검증 후 유저 고유 ID와 이름 추출
-            // 여기서는 팀원분이 붙이실 로직을 위해 임시로 토큰을 ID로 씁니다.
-            providerId = "extracted_id_from_token";
-            name = "소셜유저"; 
-        }
-
-        final String finalProviderId = providerId;
-        final String finalName = name;
-        
-        Member member;
-        boolean isNewMember = false;
-
-        if (isGuest) {
-            // 게스트는 매번 새 회원으로 취급한다고 임시 가정 (단말기 ID 등 활용할 경우 로직 변경 필요)
-            member = Member.builder()
-                    .loginProvider(LoginProvider.GUEST)
-                    .name(finalName)
-                    .build();
-            memberRepository.save(member);
-            isNewMember = true;
-        } else {
-            // 기존 가입된 소셜 유저인지 확인
-            Member existingMember = memberRepository.findByProviderIdAndLoginProvider(providerId, provider)
+            member = memberRepository.findByProviderAndProviderId(providerId, request.provider())
                     .orElse(null);
-            
-            if (existingMember == null) {
-                // 신규 가입
-                isNewMember = true;
+
+            if (member == null) {
+                log.info("[구글 신규 회원가입 진행] provider: {}, providerId: {}", request.provider(), providerId);
                 member = Member.builder()
-                        .loginProvider(provider)
-                        .providerId(finalProviderId)
-                        .name(finalName)
+                        .name(name)
+                        .provider(request.provider())
+                        .providerId(providerId)
                         .build();
-                memberRepository.save(member);
+                member = memberRepository.save(member);
+                isNewMember = true;
             } else {
-                // 기존 유저 로그인
-                member = existingMember;
+                log.info("[구글 기존 회원 로그인] memberId: {}", member.getId());
             }
+        } else {
+            log.info("[게스트 신규 회원 생성]");
+            member = Member.builder()
+                    .name("게스트")
+                    .provider("GUEST")
+                    .build();
+            member = memberRepository.save(member);
+            isNewMember = true;
         }
 
-        // TODO: (팀원 구현 부분) JWT 토큰 발급 로직 연동
-        String accessToken = "dummy_access_token_for_" + member.getId();
-        String refreshToken = "dummy_refresh_token_for_" + member.getId();
+        // 3. JwtTokenProvider를 사용한 실제 토큰 발급
+        Long memberId = member.getId();
+        String accessToken = jwtTokenProvider.createAccessToken(memberId);
+        String refreshToken = jwtTokenProvider.createRefreshToken(memberId);
+        log.info("[토큰 발급 완료] memberId: {}", memberId);
 
-        return new LoginResponse(
-                member.getId(),
-                member.getName(),
-                isGuest,
-                isNewMember,
-                accessToken,
-                refreshToken
-        );
+        // 4. MemberRes.Login 레코드 스펙에 맞춰서 반환
+        return MemberRes.Login.builder()
+                .memberId(memberId)
+                .name(member.getName())
+                .isGuest(isGuest)
+                .isNewMember(isNewMember)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
-    
-    @Transactional(readOnly = true)
-    public MemberInfoResponse getMe(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-        
-        return new MemberInfoResponse(member.getId(), member.getName(), member.getLoginProvider());
-    }
-
-    // 명세서 규격에 맞춘 응답 DTO
-    public record LoginResponse(
-            Long memberId,
-            String name,
-            boolean isGuest,
-            boolean isNewMember,
-            String accessToken,
-            String refreshToken
-    ) {}
-    
-    public record MemberInfoResponse(
-            Long memberId,
-            String name,
-            LoginProvider provider
-    ) {}
 }

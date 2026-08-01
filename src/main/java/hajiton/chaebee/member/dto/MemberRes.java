@@ -1,4 +1,4 @@
-package hajiton.chaebee.domain.member.dto;
+package hajiton.chaebee.member.dto;
 
 import lombok.Builder;
 

@@ -1,7 +1,8 @@
 package hajiton.chaebee.member.controller;
 
-import hajiton.chaebee.common.dto.ApiResponse;
 import hajiton.chaebee.member.domain.LoginProvider;
+import hajiton.chaebee.member.dto.MemberReq;
+import hajiton.chaebee.member.dto.MemberRes;
 import hajiton.chaebee.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,18 +14,14 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @PostMapping("/login")
-    public ApiResponse<?> login(@RequestBody LoginRequest request) {
-        // 구글 로그인 우선 적용 (추후 애플 등 확장 가능)
-        Object result = memberService.login(request.provider(), request.providerToken());
-        return ApiResponse.success(result);
+    // 1.1 소셜 로그인 / 게스트 로그인
+    @PostMapping("/members/login")
+    public MemberRes.Login login(@RequestBody MemberReq.Login request) {
+
+        // 공통 응답 객체 없이, 서비스에서 처리한 결과(DTO)를 그대로 프론트에 던져줌!
+        return memberService.login(request);
     }
 
-    @GetMapping("/me")
-    public ApiResponse<?> getMe() {
-        // TODO: 내 정보 조회 로직 구현
-        return ApiResponse.success(null);
-    }
 
     public record LoginRequest(LoginProvider provider, String providerToken) {}
 }
