@@ -24,5 +24,4 @@ public class MemberController {
         // 공통 응답 객체 없이, 서비스에서 처리한 결과(DTO)를 그대로 프론트에 던져줌!
         return memberService.login(request);
     }
-
 }
