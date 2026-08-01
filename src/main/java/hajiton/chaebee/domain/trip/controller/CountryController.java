@@ -1,6 +1,6 @@
 package hajiton.chaebee.domain.trip.controller;
 
-import hajiton.chaebee.common.dto.ApiResponse;
+import hajiton.chaebee.domain.dto.ApiResponse;
 import hajiton.chaebee.domain.trip.entity.City;
 import hajiton.chaebee.domain.trip.entity.Country;
 import org.springframework.web.bind.annotation.*;

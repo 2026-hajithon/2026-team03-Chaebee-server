@@ -1,19 +1,16 @@
 package hajiton.chaebee.domain.discovery.entity;
 
+import hajiton.chaebee.domain.common.BaseCreatedEntity;
 import hajiton.chaebee.domain.trip.entity.Tag;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class)
-public class SubDiscovery {
+public class SubDiscovery extends BaseCreatedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,8 +26,4 @@ public class SubDiscovery {
 
     @Column(length = 100)
     private String content; // 서브 발견 요약 내용
-
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDateTime createdAt; // 작성 일시
 }

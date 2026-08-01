@@ -1,6 +1,6 @@
 package hajiton.chaebee.domain.trip.controller;
 
-import hajiton.chaebee.common.dto.ApiResponse;
+import hajiton.chaebee.domain.dto.ApiResponse;
 import hajiton.chaebee.domain.trip.service.ChecklistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -1,20 +1,17 @@
 package hajiton.chaebee.domain.discovery.entity;
 
+import hajiton.chaebee.domain.common.BaseCreatedEntity;
 import hajiton.chaebee.domain.member.entity.Member;
 import hajiton.chaebee.domain.trip.entity.Trip;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class)
-public class Discovery {
+public class Discovery extends BaseCreatedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,8 +27,4 @@ public class Discovery {
 
     @Enumerated(EnumType.STRING)
     private TravelType travelType; // 여행 유형
-
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDateTime createdAt; // 작성 일시
 }
