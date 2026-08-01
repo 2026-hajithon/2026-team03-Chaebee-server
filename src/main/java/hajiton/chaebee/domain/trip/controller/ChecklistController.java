@@ -6,6 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Tag(name = "Checklist API", description = "체크리스트 관련 API")
 @RestController
 @RequestMapping("/api/checklist-items")
 @RequiredArgsConstructor
@@ -13,6 +19,7 @@ public class ChecklistController {
 
     private final ChecklistService checklistService;
 
+    @Operation(summary = "체크리스트 상태 변경", description = "특정 체크리스트 항목의 체크 상태를 변경합니다.")
     @PatchMapping("/{checklistItemId}")
     public ApiResponse<?> updateChecklistItem(
             @AuthenticationPrincipal Long memberId,
@@ -24,5 +31,9 @@ public class ChecklistController {
         return ApiResponse.success(null);
     }
 
-    public record UpdateChecklistRequest(Boolean isChecked) {}
+    @Schema(description = "체크리스트 업데이트 요청 DTO")
+    public record UpdateChecklistRequest(
+            @Schema(description = "체크 여부", example = "true")
+            Boolean isChecked
+    ) {}
 }

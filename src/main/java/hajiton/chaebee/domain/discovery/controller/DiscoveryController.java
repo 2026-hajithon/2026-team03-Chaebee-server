@@ -14,6 +14,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
+
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Discovery API", description = "발견 관련 API")
 @RestController
 @RequestMapping("/api/discoveries")
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class DiscoveryController {
 
 
     // 발견 등록
+    @Operation(summary = "발견 등록", description = "여행의 발견을 등록합니다.")
     @PostMapping
     public ResponseEntity<ApiResponse<DiscoveryRes.DiscoveryResponse>> createDiscovery(
             @AuthenticationPrincipal Long memberId,
@@ -34,6 +38,7 @@ public class DiscoveryController {
 
 
     // 타임라인 구성 (ApiResponse 적용)
+    @Operation(summary = "타임라인 조회", description = "특정 여행의 타임라인을 조회합니다.")
     @GetMapping("/trips/{tripId}/timeline")
     public ResponseEntity<ApiResponse<DiscoveryRes.TimelineResponse>> getTimeline(@PathVariable Long tripId) {
         DiscoveryRes.TimelineResponse response = discoveryService.getTimeline(tripId);
@@ -43,6 +48,7 @@ public class DiscoveryController {
 
 
 
+    @Operation(summary = "발견 목록 조회", description = "조건에 맞는 발견 목록을 조회합니다.")
     @GetMapping
     public ApiResponse<?> getDiscoveries(
             @AuthenticationPrincipal Long memberId,
@@ -54,6 +60,7 @@ public class DiscoveryController {
         return ApiResponse.success(response);
     }
 
+    @Operation(summary = "발견 상세 조회", description = "특정 발견의 상세 정보를 조회합니다.")
     @GetMapping("/{discoveryId}")
     public ApiResponse<?> getDiscovery(
             @AuthenticationPrincipal Long memberId,
