@@ -113,10 +113,19 @@ public class DiscoveryService {
         // 2. 체크리스트 및 팁 데이터 조회
         List<ChecklistItem> checklists = checklistItemRepository.findAllByTripId(tripId);
 
-        Optional<Discovery> optionalDiscovery = discoveryRepository.findByTripId(tripId);
-        List<SubDiscovery> subDiscoveries = optionalDiscovery
-                .map(discovery -> subDiscoveryRepository.findAllByDiscoveryId(discovery.getId()))
-                .orElse(Collections.emptyList());
+        // '목적지(City)'를 기준으로 모든 Discovery를 가져옴
+        // trip.cityCode가 현재 city와 같은 것들)
+        List<Discovery> destinationDiscoveries = discoveryRepository.findAllByTrip_CityCode(city);
+
+        // 가져온 Discovery들의 ID만 추출
+        List<Long> discoveryIds = destinationDiscoveries.stream()
+                .map(Discovery::getId)
+                .toList();
+
+        // ID 리스트를 이용해 해당하는 모든 SubDiscovery(팁)들을 한 번에 조회 (IN 쿼리 사용)
+        List<SubDiscovery> subDiscoveries = discoveryIds.isEmpty() ?
+                Collections.emptyList() :
+                subDiscoveryRepository.findAllByDiscoveryIdIn(discoveryIds);
 
         log.debug("조회된 체크리스트 수: {}, 서브 발견 수: {}", checklists.size(), subDiscoveries.size());
 
@@ -158,7 +167,7 @@ public class DiscoveryService {
                 })
                 .collect(Collectors.groupingBy(dto -> dto.tag().getDDay()));
 
-        Map<Integer, List<DiscoveryRes.TimelineDiscovery>> discoveryMap = subDiscoveries.stream()
+        Map<Integer, DiscoveryRes.TimelineDiscovery> discoveryMap = subDiscoveries.stream()
                 .map(sub -> {
                     Tag tagEnum = sub.getTag();
                     allDDays.add(tagEnum.getDDay());
@@ -168,16 +177,22 @@ public class DiscoveryService {
                             sub.getContent()
                     );
                 })
-                .collect(Collectors.groupingBy(dto -> dto.tag().getDDay()));
+                // 같은 D-Day(Tag) 그룹에서 첫 번째 것만 남김
+                .collect(Collectors.toMap(
+                        dto -> dto.tag().getDDay(),
+                        dto -> dto,
+                        (existing, replacement) -> existing
+                ));
 
         // 6. TimelineGroup 리스트 조립
         List<DiscoveryRes.TimelineGroup> timelineGroups = allDDays.stream()
                 .map(dDay -> {
                     LocalDate targetDate = departureDate.plusDays(dDay);
+                    DiscoveryRes.TimelineDiscovery discovery = discoveryMap.get(dDay); // null 가능
                     return new DiscoveryRes.TimelineGroup(
                             dDay,
                             targetDate,
-                            discoveryMap.getOrDefault(dDay, Collections.emptyList()),
+                            discovery == null ? Collections.emptyList() : List.of(discovery),
                             checklistMap.getOrDefault(dDay, Collections.emptyList())
                     );
                 })
