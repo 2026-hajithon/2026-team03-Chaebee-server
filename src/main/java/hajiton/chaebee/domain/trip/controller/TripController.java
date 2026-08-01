@@ -14,6 +14,7 @@ public class TripController {
 
     private final TripService tripService;
 
+    //여행 등록
     @PostMapping
     public ApiResponse<?> createTrip(
             @AuthenticationPrincipal Long memberId,

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -29,19 +30,19 @@ public class TripService {
     public TripResponse createTrip(Long memberId, String countryCodeStr, String cityCodeStr,
                                    LocalDateTime departureAt, LocalDateTime arrivalAt,
                                    Boolean esimPlan, Boolean cashPlan) {
-        
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        // 기존에 진행 중인 여행이 있는지 확인 로직 추가 필요 (DUPLICATED_ACTIVE_TRIP)
-        // 임시로 그냥 넘기거나 예외 처리 가능
-        // if (tripRepository.existsByMemberIdAndArrivalDateAfter(memberId, LocalDateTime.now())) {
-        //     throw new IllegalStateException("이미 진행중인 여행이 있습니다.");
-        // }
+        // 1. 기존에 진행 중인 여행이 있는지 확인 (활성화 완료)
+        if (tripRepository.existsByMemberIdAndArrivalDateAfter(memberId, LocalDateTime.now())) {
+            throw new IllegalStateException("이미 진행중인 여행이 있습니다. (DUPLICATED_ACTIVE_TRIP)");
+        }
 
         Country country = Country.valueOf(countryCodeStr);
         City city = City.valueOf(cityCodeStr);
 
+        // 2. 여행 객체 생성 및 저장
         Trip trip = Trip.builder()
                 .member(member)
                 .countryCode(country)
@@ -54,21 +55,23 @@ public class TripService {
 
         Trip savedTrip = tripRepository.save(trip);
 
-        // 도시에 맞는 필수 준비물 태그들을 기반으로 체크리스트 생성
-        // (City enum에서 전체 태그를 가져와서 ChecklistItem으로 저장)
-        // City 클래스의 구조에 따라 전체 태그를 순회하며 저장
-        for (Tag tag : Tag.values()) {
-            // 해당 도시에 적용 가능한 태그인지 확인하는 필터링 로직이 있다면 여기서 분기
-            ChecklistItem item = ChecklistItem.builder()
-                    .trip(savedTrip)
-                    .tag(tag)
-                    .dDay(tag.getDDay())
-                    .isChecked(false)
-                    .build();
-            checklistItemRepository.save(item);
-        }
+        // 3. 도시에 맞는 태그 필터링 및 체크리스트 일괄 저장 (Batch Insert로 N+1 방지)
+        List<ChecklistItem> checklistItems = city.getApplicableTags().stream()
+                .map(tag -> ChecklistItem.builder()
+                        .trip(savedTrip)
+                        .tag(tag)
+                        .dDay(tag.getDDay())
+                        .isChecked(false)
+                        .build())
+                .toList();
 
-        long dDay = ChronoUnit.DAYS.between(LocalDateTime.now(), departureAt);
+        checklistItemRepository.saveAll(checklistItems);
+
+        // 4. 시간 오차 방지를 위해 LocalDate로 변환하여 정확한 D-Day 날짜 계산
+        long dDay = ChronoUnit.DAYS.between(
+                LocalDate.now(),
+                departureAt.toLocalDate()
+        );
 
         return new TripResponse(
                 savedTrip.getId(),

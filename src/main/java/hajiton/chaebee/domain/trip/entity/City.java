@@ -108,4 +108,8 @@ public enum City {
                 .filter(tag -> tag.getDDay() == -dDay)
                 .collect(Collectors.toList());
     }
+
+    public List<Tag> getApplicableTags() {
+        return applicableTags;
+    }
 }
