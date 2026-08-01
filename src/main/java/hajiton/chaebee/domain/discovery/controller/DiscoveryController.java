@@ -1,5 +1,7 @@
 package hajiton.chaebee.domain.discovery.controller;
 
+import hajiton.chaebee.domain.discovery.dto.DiscoveryReq;
+import hajiton.chaebee.domain.discovery.dto.DiscoveryRes;
 import hajiton.chaebee.domain.discovery.entity.SubDiscovery;
 import hajiton.chaebee.domain.dto.ApiResponse;
 import hajiton.chaebee.domain.discovery.service.DiscoveryService;
