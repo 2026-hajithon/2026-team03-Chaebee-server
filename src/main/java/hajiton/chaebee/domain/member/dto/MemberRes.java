@@ -9,7 +9,7 @@ public class MemberRes {
 
     }
 
-    @Schema(description = "로그인 응답 DTO")
+    @Schema(name = "MemberLoginRes", description = "로그인 응답 DTO")
     @Builder // record에도 Builder를 달아두면 Service에서 값 넣을 때 편해!
     public record Login(
             @Schema(description = "DB에 저장된 회원 PK", example = "1")

@@ -8,7 +8,7 @@ public class MemberReq {
 
     }
 
-    @Schema(description = "로그인 요청 DTO")
+    @Schema(name = "MemberLoginReq", description = "로그인 요청 DTO")
     public record Login(
             @Schema(description = "로그인 제공자 (GOOGLE, APPLE, KAKAO, GUEST)", example = "GOOGLE")
             String provider,
