@@ -86,23 +86,27 @@ public class TripService {
     }
 
     @Transactional(readOnly = true)
-    public TripResponse getMyTrip(Long memberId) {
-        // 본인의 진행 중인 여행 하나를 가져온다고 가정
-        Trip trip = tripRepository.findFirstByMemberIdOrderByDepartureDateDesc(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("등록된 여행이 없습니다. (TRIP_NOT_FOUND)"));
+    public List<TripResponse> getMyTrip(Long memberId) {
+        // 본인의 모든 여행 목록을 출발일 기준 내림차순으로 가져옴
+        List<Trip> trips = tripRepository.findAllByMemberIdOrderByDepartureDateDesc(memberId);
 
-        long dDay = ChronoUnit.DAYS.between(LocalDateTime.now(), trip.getDepartureDate());
+        if (trips.isEmpty()) {
+            throw new IllegalArgumentException("등록된 여행이 없습니다. (TRIP_NOT_FOUND)");
+        }
 
-        return new TripResponse(
-                trip.getId(),
-                trip.getCountryCode().name(),
-                trip.getCityCode().name(),
-                trip.getDepartureDate(),
-                trip.getArrivalDate(),
-                trip.getHasEsim(),
-                trip.getHasCash(),
-                (int) dDay
-        );
+        return trips.stream().map(trip -> {
+            long dDay = ChronoUnit.DAYS.between(LocalDateTime.now(), trip.getDepartureDate());
+            return new TripResponse(
+                    trip.getId(),
+                    trip.getCountryCode().name(),
+                    trip.getCityCode().name(),
+                    trip.getDepartureDate(),
+                    trip.getArrivalDate(),
+                    trip.getHasEsim(),
+                    trip.getHasCash(),
+                    (int) dDay
+            );
+        }).toList();
     }
 
     @Transactional

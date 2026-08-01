@@ -24,11 +24,11 @@ public class TripController {
 
     @Operation(summary = "여행 등록", description = "새로운 여행을 등록합니다.")
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createTrip(
+    public ResponseEntity<ApiResponse<TripService.TripResponse>> createTrip(
             @AuthenticationPrincipal Long memberId,
             @RequestBody TripReq.TripCreateRequest request) {
 
-        var response = tripService.createTrip(
+        TripService.TripResponse response = tripService.createTrip(
                 memberId,
                 request.countryCode(),
                 request.cityCode(),
@@ -40,7 +40,7 @@ public class TripController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "내 여행 조회", description = "나의 여행 목록을 조회합니다.")
+    @Operation(summary = "내 모든 여행 조회", description = "내가 등록한 모든 여행 목록을 최신순으로 조회합니다.")
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<?>> getMyTrip(@AuthenticationPrincipal Long memberId) {
         var response = tripService.getMyTrip(memberId);
