@@ -33,12 +33,7 @@ public class DiscoveryController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "타임라인 조회", description = "특정 여행의 타임라인을 조회합니다.")
-    @GetMapping("/trips/{tripId}/timeline")
-    public ResponseEntity<ApiResponse<?>> getTimeline(@PathVariable Long tripId) {
-        DiscoveryRes.TimelineResponse response = discoveryService.getTimeline(tripId);
-        return ResponseEntity.ok(ApiResponse.success(response)); // 💡 여기서 한 번 감싸주기만 하면 끝!
-    }
+
 
     @Operation(summary = "발견 목록 조회", description = "조건에 맞는 발견 목록을 조회합니다.")
     @GetMapping

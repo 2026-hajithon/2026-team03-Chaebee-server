@@ -32,5 +32,4 @@ public class ChecklistController {
 
         return ResponseEntity.ok(ApiResponse.success(null));
     }
-
 }

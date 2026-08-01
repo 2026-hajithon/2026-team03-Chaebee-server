@@ -142,19 +142,85 @@ public class TripService {
     }
 
     @Transactional(readOnly = true)
-    public Object getTimeline(Long memberId, Long tripId) {
+    public hajiton.chaebee.domain.trip.dto.TripRes.TimelineResponse getTimeline(Long memberId, Long tripId) {
+        // 1. 여행 정보 및 Enum 데이터 세팅
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new IllegalArgumentException("TRIP_NOT_FOUND"));
         if (!trip.getMember().getId().equals(memberId)) throw new IllegalArgumentException("FORBIDDEN");
 
-        List<ChecklistItem> items = checklistItemRepository.findByTripIdOrderByDDayDesc(tripId);
-        
-        // 간단히 항목 목록만 반환 (추후 D-Day별 그룹핑 로직 필요)
-        return items.stream().map(item -> new ChecklistItemDto(
-                item.getId(),
-                item.getTag().name(),
-                item.getTag().getDescription(),
-                item.getDDay(),
-                item.getIsChecked()
-        )).toList();
+        City city = trip.getCityCode();
+        Country country = city.getCountry();
+        LocalDate departureDate = trip.getDepartureDate().toLocalDate();
+        long currentDday = ChronoUnit.DAYS.between(LocalDate.now(), departureDate);
+
+        // 2. 체크리스트 및 팁 데이터 조회
+        List<ChecklistItem> checklists = checklistItemRepository.findAllByTripId(tripId);
+
+        java.util.Optional<hajiton.chaebee.domain.discovery.entity.Discovery> optionalDiscovery = discoveryRepository.findByTripId(tripId);
+        List<hajiton.chaebee.domain.discovery.entity.SubDiscovery> subDiscoveries = optionalDiscovery
+                .map(discovery -> subDiscoveryRepository.findByDiscoveryId(discovery.getId()))
+                .orElse(java.util.Collections.emptyList());
+
+        // 3. 상단 헤더 (TripInfo) 조립
+        int totalChecklists = checklists.size();
+        int completedChecklists = (int) checklists.stream().filter(ChecklistItem::getIsChecked).count();
+        int percentage = totalChecklists == 0 ? 0 : (int) Math.round((double) completedChecklists / totalChecklists * 100);
+
+        hajiton.chaebee.domain.trip.dto.TripRes.Progress progress = new hajiton.chaebee.domain.trip.dto.TripRes.Progress(totalChecklists, completedChecklists, percentage);
+        hajiton.chaebee.domain.trip.dto.TripRes.TripInfo tripInfo = new hajiton.chaebee.domain.trip.dto.TripRes.TripInfo(
+                city.getKoreanName() + ", " + country.getKoreanName(),
+                currentDday,
+                progress
+        );
+
+        // 4. 하단 필수 정보 (EssentialInfo) 조립
+        hajiton.chaebee.domain.trip.dto.TripRes.EssentialInfo essentialInfo = new hajiton.chaebee.domain.trip.dto.TripRes.EssentialInfo(
+                country.getPassportValidityRule(),
+                country.getVisaFreeStayDays(),
+                country.getOfficialSiteUrl(),
+                country.getLastUpdatedAt()
+        );
+
+        // 5. D-Day 기준으로 데이터 그룹화
+        java.util.Set<Integer> allDDays = new java.util.TreeSet<>();
+
+        java.util.Map<Integer, List<hajiton.chaebee.domain.trip.dto.TripRes.TimelineChecklist>> checklistMap = checklists.stream()
+                .map(item -> {
+                    Tag tagEnum = item.getTag();
+                    allDDays.add(tagEnum.getDDay());
+                    return new hajiton.chaebee.domain.trip.dto.TripRes.TimelineChecklist(
+                            item.getId(),
+                            tagEnum,
+                            tagEnum.getDescription(),
+                            item.getIsChecked()
+                    );
+                })
+                .collect(java.util.stream.Collectors.groupingBy(dto -> dto.tag().getDDay()));
+
+        java.util.Map<Integer, List<hajiton.chaebee.domain.trip.dto.TripRes.TimelineDiscovery>> discoveryMap = subDiscoveries.stream()
+                .map(sub -> {
+                    Tag tagEnum = sub.getTag();
+                    allDDays.add(tagEnum.getDDay());
+                    return new hajiton.chaebee.domain.trip.dto.TripRes.TimelineDiscovery(
+                            tagEnum,
+                            tagEnum.getDescription(),
+                            sub.getContent()
+                    );
+                })
+                .collect(java.util.stream.Collectors.groupingBy(dto -> dto.tag().getDDay()));
+
+        // 6. TimelineGroup 리스트 조립
+        List<hajiton.chaebee.domain.trip.dto.TripRes.TimelineGroup> timelineGroups = allDDays.stream()
+                .map(dDay -> {
+                    LocalDate targetDate = departureDate.plusDays(dDay);
+                    return new hajiton.chaebee.domain.trip.dto.TripRes.TimelineGroup(
+                            dDay,
+                            targetDate,
+                            discoveryMap.getOrDefault(dDay, java.util.Collections.emptyList()),
+                            checklistMap.getOrDefault(dDay, java.util.Collections.emptyList())
+                    );
+                })
+                .toList();
+
+        return new hajiton.chaebee.domain.trip.dto.TripRes.TimelineResponse(tripInfo, timelineGroups, essentialInfo);
     }
 }
