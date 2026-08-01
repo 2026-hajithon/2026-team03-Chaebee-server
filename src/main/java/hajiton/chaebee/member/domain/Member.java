@@ -19,7 +19,6 @@ public class Member {
     @Column(length = 50)
     private String name; // 이름/닉네임
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private String provider; // 로그인 제공자
 
