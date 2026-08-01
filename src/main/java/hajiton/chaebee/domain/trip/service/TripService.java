@@ -139,7 +139,7 @@ public class TripService {
 
     @Transactional
     public void updateTrip(Long memberId, Long tripId, Object request) {
-        // TODO: 요청 DTO 기반 필드 수정 로직 (날짜 변경 등)
+
     }
 
 //    @Transactional(readOnly = true)

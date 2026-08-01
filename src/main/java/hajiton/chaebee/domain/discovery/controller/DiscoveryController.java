@@ -45,7 +45,7 @@ public class DiscoveryController {
             @RequestParam(required = false) String tripType,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        // TODO: 발견 목록 조회 (최신순) 로직 - memberId 활용
+
         return ApiResponse.success(null);
     }
 
@@ -53,7 +53,7 @@ public class DiscoveryController {
     public ApiResponse<?> getDiscovery(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long discoveryId) {
-        // TODO: 발견 상세 조회 로직 - memberId 활용
+
         return ApiResponse.success(null);
     }
 
