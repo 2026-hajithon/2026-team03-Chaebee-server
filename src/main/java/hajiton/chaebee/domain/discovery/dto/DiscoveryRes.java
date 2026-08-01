@@ -7,73 +7,67 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import hajiton.chaebee.domain.discovery.entity.SubDiscovery;
+
 public class DiscoveryRes {
 
     private DiscoveryRes() {
 
     }
 
+    @Schema(description = "발견 상세 응답 DTO")
     public record DiscoveryResponse(
-            Long discoveryId,
-            Long tripId,
-            String countryCode,
-            String cityCode,
-            TravelType tripType,
-            LocalDateTime createdAt,
-            List<SubDiscoveryResponse> subDiscoveries
+            @Schema(description = "발견 ID", example = "1") Long discoveryId,
+            @Schema(description = "여행 ID", example = "1") Long tripId,
+            @Schema(description = "국가 코드", example = "JAPAN") String countryCode,
+            @Schema(description = "도시 코드", example = "TOKYO") String cityCode,
+            @Schema(description = "여행 유형", example = "COUPLE") TravelType tripType,
+            @Schema(description = "생성 일시") LocalDateTime createdAt,
+            @Schema(description = "서브 발견 목록") List<SubDiscoveryResponse> subDiscoveries
     ) {}
 
+    @Schema(description = "서브 발견 응답 DTO")
     public record SubDiscoveryResponse(
-            Long subDiscoveryId,
-            Tag tag,
-            String content
+            @Schema(description = "서브 발견 ID", example = "1") Long subDiscoveryId,
+            @Schema(description = "태그", example = "FOOD") Tag tag,
+            @Schema(description = "내용", example = "맛집 발견!") String content
+    ) {}
+
+    @Schema(description = "서브 발견 타임라인 카드 DTO")
+    public record SubDiscoveryCardResponse(
+            @Schema(description = "서브 발견 ID", example = "1") Long subDiscoveryId,
+            @Schema(description = "태그", example = "FOOD") Tag tag,
+            @Schema(description = "내용", example = "맛집 발견!") String content
+    ) {
+        public static SubDiscoveryCardResponse from(SubDiscovery subDiscovery) {
+            return new SubDiscoveryCardResponse(
+                    subDiscovery.getId(),
+                    subDiscovery.getTag(),
+                    subDiscovery.getContent()
+            );
+        }
+    }
+
+    @Schema(description = "발견 목록 응답 DTO")
+    public record DiscoveryListResponse(
+            @Schema(description = "발견 목록") List<DiscoveryListItemResponse> content,
+            @Schema(description = "전체 요소 수", example = "100") long totalElements,
+            @Schema(description = "전체 페이지 수", example = "10") int totalPages,
+            @Schema(description = "현재 페이지 (0부터 시작)", example = "0") int currentPage
+    ) {}
+
+    @Schema(description = "발견 목록 아이템 DTO")
+    public record DiscoveryListItemResponse(
+            @Schema(description = "발견 ID", example = "1") Long discoveryId,
+            @Schema(description = "국가 코드", example = "JAPAN") String countryCode,
+            @Schema(description = "도시 코드", example = "TOKYO") String cityCode,
+            @Schema(description = "여행 유형", example = "COUPLE") String tripType,
+            @Schema(description = "작성자 이름", example = "홍길동") String authorName,
+            @Schema(description = "생성 일시") LocalDateTime createdAt
     ) {}
 
 
-    // ==========================================
-    public record TimelineResponse(
-            TripInfo tripInfo,
-            List<TimelineGroup> timeline,
-            EssentialInfo essentialInfo // 하단 필수 정보 추가
-    ) {}
-
-    public record TripInfo(
-            String destination,
-            long dDay,
-            Progress progress
-    ) {}
-
-    public record Progress(
-            int total,
-            int completed,
-            int percentage
-    ) {}
-
-    public record TimelineGroup(
-            int dDay,
-            LocalDate date,
-            List<TimelineDiscovery> discoveries,
-            List<TimelineChecklist> checklists
-    ) {}
-
-    public record TimelineDiscovery(
-            Tag tag,
-            String title,
-            String content
-    ) {}
-
-    public record TimelineChecklist(
-            Long checklistId,
-            Tag tag,
-            String title,
-            boolean isChecked
-    ) {}
-
-    // Country Enum에서 가져올 하단 필수 정보 영역
-    public record EssentialInfo(
-            String passportValidityRule,
-            Integer visaFreeStayDays,
-            String officialSiteUrl,
-            LocalDate lastUpdatedAt
-    ) {}
 }

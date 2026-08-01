@@ -10,9 +10,12 @@ import java.util.List;
 
 @Repository
 public interface ChecklistItemRepository extends JpaRepository<ChecklistItem, Long> {
+    @Query("SELECT c FROM ChecklistItem c WHERE c.trip.id = :tripId ORDER BY c.dDay DESC")
+    List<ChecklistItem> findByTripIdOrderByDDayDesc(@Param("tripId") Long tripId);
 
-    @Query("SELECT c FROM ChecklistItem c WHERE c.trip.id = :tripId ORDER BY c.dDay desc")
-    List<ChecklistItem> findAllByTripId(@Param("tripId") Long tripId);
+    List<ChecklistItem> findAllByTripId(Long tripId);
 
-//    List<ChecklistItem> findAllByTripId(Long tripId);
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM ChecklistItem c WHERE c.trip.id = :tripId")
+    void deleteByTripId(@Param("tripId") Long tripId);
 }

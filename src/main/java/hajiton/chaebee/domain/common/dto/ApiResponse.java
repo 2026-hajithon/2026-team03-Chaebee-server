@@ -1,4 +1,4 @@
-package hajiton.chaebee.domain.dto;
+package hajiton.chaebee.domain.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;

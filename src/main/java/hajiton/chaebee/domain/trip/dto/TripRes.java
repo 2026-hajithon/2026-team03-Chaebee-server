@@ -1,0 +1,106 @@
+package hajiton.chaebee.domain.trip.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class TripRes {
+
+    @Schema(description = "여행 응답 DTO")
+    public record TripResponse(
+            @Schema(description = "여행 ID", example = "1")
+            Long tripId,
+
+            @Schema(description = "국가 코드", example = "USA")
+            String countryCode,
+
+            @Schema(description = "도시 코드", example = "LOS_ANGELES")
+            String cityCode,
+
+            @Schema(description = "출발일", example = "2026-09-10T09:00:00")
+            LocalDateTime departureAt,
+
+            @Schema(description = "도착일", example = "2026-09-20T18:00:00")
+            LocalDateTime arrivalAt,
+
+            @Schema(description = "eSIM 계획 여부", example = "true")
+            Boolean esimPlan,
+
+            @Schema(description = "현금 계획 여부", example = "false")
+            Boolean cashPlan,
+
+            @Schema(description = "디데이", example = "30")
+            Integer dDay
+    ) {}
+
+    @Schema(description = "타임라인 응답 DTO")
+    public record TimelineResponse(
+            @Schema(description = "상단 여행 요약 정보") TripInfo tripInfo,
+            @Schema(description = "D-Day별 타임라인 데이터 목록") List<TimelineGroup> timeline,
+            @Schema(description = "하단 국가 필수 정보") EssentialInfo essentialInfo
+    ) {}
+
+    @Schema(description = "타임라인 상단 여행 정보 DTO")
+    public record TripInfo(
+            @Schema(description = "도착지 정보 (도시, 국가)", example = "도쿄, 일본") String destination,
+            @Schema(description = "D-Day", example = "-14") long dDay,
+            @Schema(description = "체크리스트 진척도 정보") Progress progress
+    ) {}
+
+    @Schema(description = "체크리스트 진척도 DTO")
+    public record Progress(
+            @Schema(description = "전체 항목 수", example = "10") int total,
+            @Schema(description = "완료된 항목 수", example = "3") int completed,
+            @Schema(description = "완료율 (%)", example = "30") int percentage
+    ) {}
+
+    @Schema(description = "D-Day별 타임라인 그룹 DTO")
+    public record TimelineGroup(
+            @Schema(description = "D-Day", example = "-14") int dDay,
+            @Schema(description = "해당 날짜", example = "2026-08-26") java.time.LocalDate date,
+            @Schema(description = "해당 D-Day의 팁/발견 목록") List<TimelineDiscovery> discoveries,
+            @Schema(description = "해당 D-Day의 체크리스트 목록") List<TimelineChecklist> checklists
+    ) {}
+
+    @Schema(description = "타임라인 내 발견 항목 DTO")
+    public record TimelineDiscovery(
+            @Schema(description = "태그", example = "PASSPORT") hajiton.chaebee.domain.trip.entity.Tag tag,
+            @Schema(description = "제목", example = "여권 재발급") String title,
+            @Schema(description = "내용", example = "여권 만료일이 6개월 이상 남았는지 확인하세요.") String content
+    ) {}
+
+    @Schema(description = "타임라인 내 체크리스트 항목 DTO")
+    public record TimelineChecklist(
+            @Schema(description = "체크리스트 ID", example = "1") Long checklistId,
+            @Schema(description = "태그", example = "FLIGHT") hajiton.chaebee.domain.trip.entity.Tag tag,
+            @Schema(description = "제목", example = "항공권 예매") String title,
+            @Schema(description = "체크 여부", example = "false") boolean isChecked
+    ) {}
+
+    // Country Enum에서 가져올 하단 필수 정보 영역
+    @Schema(description = "국가 필수 정보 DTO")
+    public record EssentialInfo(
+            @Schema(description = "여권 유효기간 규정", example = "입국 시 6개월 이상") String passportValidityRule,
+            @Schema(description = "무비자 체류 가능 일수", example = "90") Integer visaFreeStayDays,
+            @Schema(description = "공식 사이트 URL", example = "https://...") String officialSiteUrl,
+            @Schema(description = "정보 최종 업데이트 일자", example = "2026-07-01") java.time.LocalDate lastUpdatedAt
+    ) {}
+    
+    @Schema(description = "타임라인 체크리스트 항목 DTO")
+    public record ChecklistItemDto(
+            @Schema(description = "체크리스트 항목 ID", example = "10")
+            Long checklistItemId,
+
+            @Schema(description = "태그 명", example = "FLIGHT")
+            String tag,
+
+            @Schema(description = "체크리스트 제목", example = "항공권 예매")
+            String title,
+
+            @Schema(description = "디데이 기준", example = "-30")
+            int dDay,
+
+            @Schema(description = "체크 완료 여부", example = "false")
+            boolean isChecked
+    ) {}
+}

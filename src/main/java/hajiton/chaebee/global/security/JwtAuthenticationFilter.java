@@ -27,10 +27,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String token = resolveToken(request);
-        if (token != null && jwtTokenProvider.validateToken(token) && jwtTokenProvider.isAccessToken(token)) {
-            Long userId = jwtTokenProvider.getUserId(token);
-            var authentication = new UsernamePasswordAuthenticationToken(userId, null, List.of());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (token != null) {
+            if (jwtTokenProvider.validateToken(token)) {
+                if (jwtTokenProvider.isAccessToken(token)) {
+                    Long userId = jwtTokenProvider.getUserId(token);
+                    var authentication = new UsernamePasswordAuthenticationToken(userId, null, List.of());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    logger.warn("Token is valid but not an access token.");
+                }
+            } else {
+                logger.warn("Token validation failed (e.g., expired or invalid signature).");
+            }
+        } else {
+            logger.debug("No Bearer token found in request to " + request.getRequestURI());
         }
         filterChain.doFilter(request, response);
     }
