@@ -18,6 +18,10 @@ public interface DiscoveryRepository extends JpaRepository<Discovery, Long> {
 
     Optional<Discovery> findByTripId(Long tripId);
 
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM Discovery d WHERE d.trip.id = :tripId")
+    void deleteByTripId(@Param("tripId") Long tripId);
+
     @Query("SELECT d FROM Discovery d JOIN FETCH d.trip t JOIN FETCH d.member WHERE d.id = :id")
     Optional<Discovery> findWithTripAndMemberById(@Param("id") Long id);
 

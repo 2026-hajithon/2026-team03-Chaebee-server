@@ -14,4 +14,8 @@ public interface ChecklistItemRepository extends JpaRepository<ChecklistItem, Lo
     List<ChecklistItem> findByTripIdOrderByDDayDesc(@Param("tripId") Long tripId);
 
     List<ChecklistItem> findAllByTripId(Long tripId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM ChecklistItem c WHERE c.trip.id = :tripId")
+    void deleteByTripId(@Param("tripId") Long tripId);
 }

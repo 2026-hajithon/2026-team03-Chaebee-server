@@ -25,6 +25,9 @@ public class TripService {
     private final TripRepository tripRepository;
     private final ChecklistItemRepository checklistItemRepository;
     private final MemberRepository memberRepository;
+    private final hajiton.chaebee.domain.discovery.repository.DiscoveryRepository discoveryRepository;
+    private final hajiton.chaebee.domain.discovery.repository.SubDiscoveryRepository subDiscoveryRepository;
+    private final hajiton.chaebee.domain.discovery.repository.DiscoveryAssignmentRepository discoveryAssignmentRepository;
 
     @Transactional
     public TripResponse createTrip(Long memberId, String countryCodeStr, String cityCodeStr,
@@ -118,7 +121,21 @@ public class TripService {
             throw new IllegalArgumentException("삭제 권한이 없습니다. (FORBIDDEN)");
         }
         
-        // ChecklistItem 등 연관 데이터 삭제 로직 (보통 CASCADE로 처리하거나 여기서 수동 삭제)
+        // 1. ChecklistItem 삭제
+        checklistItemRepository.deleteByTripId(tripId);
+
+        // 2. Discovery 연관 데이터 삭제 (Discovery -> SubDiscovery -> DiscoveryAssignment)
+        discoveryRepository.findByTripId(tripId).ifPresent(discovery -> {
+            List<hajiton.chaebee.domain.discovery.entity.SubDiscovery> subDiscoveries = subDiscoveryRepository.findByDiscoveryId(discovery.getId());
+            if (!subDiscoveries.isEmpty()) {
+                List<Long> subDiscoveryIds = subDiscoveries.stream().map(hajiton.chaebee.domain.discovery.entity.SubDiscovery::getId).toList();
+                discoveryAssignmentRepository.deleteBySubDiscoveryIdIn(subDiscoveryIds);
+                subDiscoveryRepository.deleteByDiscoveryId(discovery.getId());
+            }
+            discoveryRepository.deleteByTripId(tripId);
+        });
+
+        // 3. Trip 삭제
         tripRepository.delete(trip);
     }
 

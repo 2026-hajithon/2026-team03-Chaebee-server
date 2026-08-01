@@ -10,4 +10,8 @@ import java.util.List;
 @Repository
 public interface DiscoveryAssignmentRepository extends JpaRepository<DiscoveryAssignment, Long> {
     List<DiscoveryAssignment> findByMemberIdAndAssignedDate(Long memberId, LocalDate assignedDate);
+    
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM DiscoveryAssignment d WHERE d.subDiscovery.id IN :subDiscoveryIds")
+    void deleteBySubDiscoveryIdIn(@org.springframework.data.repository.query.Param("subDiscoveryIds") List<Long> subDiscoveryIds);
 }

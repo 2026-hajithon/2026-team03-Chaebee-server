@@ -17,6 +17,10 @@ import java.util.List;
 public interface SubDiscoveryRepository extends JpaRepository<SubDiscovery, Long>, JpaSpecificationExecutor<SubDiscovery> {
     List<SubDiscovery> findByDiscoveryId(Long discoveryId);
 
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM SubDiscovery s WHERE s.discovery.id = :discoveryId")
+    void deleteByDiscoveryId(@Param("discoveryId") Long discoveryId);
+
     @Query("""
             SELECT sd FROM SubDiscovery sd
             JOIN FETCH sd.discovery d
