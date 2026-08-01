@@ -6,10 +6,10 @@ import hajiton.chaebee.domain.common.dto.ApiResponse;
 import hajiton.chaebee.domain.trip.entity.Tag;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,18 +24,18 @@ public class SubDiscoveryController {
 
     @Operation(summary = "서브 발견 조회", description = "조건에 맞는 서브 발견 목록을 조회합니다.")
     @GetMapping
-    public ApiResponse<?> getSubDiscoveries(
+    public ResponseEntity<ApiResponse<?>> getSubDiscoveries(
             @RequestParam(required = false) String countryCode,
             @RequestParam(required = false) String tag) {
         var response = subDiscoveryService.getSubDiscoveries(countryCode, tag);
-        return ApiResponse.success(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @Operation(summary = "일일 서브 발견 조회", description = "매일 새롭게 배정되는 서브 발견을 조회합니다.")
     @GetMapping("/daily")
-    public ApiResponse<?> getDailySubDiscoveries(@AuthenticationPrincipal Long memberId) {
+    public ResponseEntity<ApiResponse<?>> getDailySubDiscoveries(@AuthenticationPrincipal Long memberId) {
         var response = subDiscoveryService.getDailySubDiscoveries(memberId);
-        return ApiResponse.success(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
 }

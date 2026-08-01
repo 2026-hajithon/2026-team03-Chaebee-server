@@ -25,7 +25,7 @@ public class DiscoveryController {
 
     @Operation(summary = "발견 등록", description = "여행의 발견을 등록합니다.")
     @PostMapping
-    public ResponseEntity<ApiResponse<DiscoveryRes.DiscoveryResponse>> createDiscovery(
+    public ResponseEntity<ApiResponse<?>> createDiscovery(
             @AuthenticationPrincipal Long memberId,
             @RequestBody @Valid DiscoveryReq.CreateDiscoveryRequest request
     ) {
@@ -35,30 +35,30 @@ public class DiscoveryController {
 
     @Operation(summary = "타임라인 조회", description = "특정 여행의 타임라인을 조회합니다.")
     @GetMapping("/trips/{tripId}/timeline")
-    public ResponseEntity<ApiResponse<DiscoveryRes.TimelineResponse>> getTimeline(@PathVariable Long tripId) {
+    public ResponseEntity<ApiResponse<?>> getTimeline(@PathVariable Long tripId) {
         DiscoveryRes.TimelineResponse response = discoveryService.getTimeline(tripId);
         return ResponseEntity.ok(ApiResponse.success(response)); // 💡 여기서 한 번 감싸주기만 하면 끝!
     }
 
     @Operation(summary = "발견 목록 조회", description = "조건에 맞는 발견 목록을 조회합니다.")
     @GetMapping
-    public ApiResponse<?> getDiscoveries(
+    public ResponseEntity<ApiResponse<?>> getDiscoveries(
             @AuthenticationPrincipal Long memberId,
             @RequestParam(required = false) String countryCode,
             @RequestParam(required = false) String tripType,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         var response = discoveryService.getDiscoveries(countryCode, tripType, page, size);
-        return ApiResponse.success(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @Operation(summary = "발견 상세 조회", description = "특정 발견의 상세 정보를 조회합니다.")
     @GetMapping("/{discoveryId}")
-    public ApiResponse<?> getDiscovery(
+    public ResponseEntity<ApiResponse<?>> getDiscovery(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long discoveryId) {
         var response = discoveryService.getDiscovery(memberId, discoveryId);
-        return ApiResponse.success(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
 }
