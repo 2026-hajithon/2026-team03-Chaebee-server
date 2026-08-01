@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DiscoveryRepository extends JpaRepository<Discovery, Long> {
+    boolean existsByTripId(Long tripId);
 }

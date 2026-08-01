@@ -21,7 +21,7 @@ public class Discovery {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trip_id", nullable = false)
+    @JoinColumn(name = "trip_id", nullable = false, unique = true)
     private Trip trip; // 연결된 여행 (여행 1개당 발견 1개)
 
     @ManyToOne(fetch = FetchType.LAZY)

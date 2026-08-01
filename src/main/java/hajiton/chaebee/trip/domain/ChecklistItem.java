@@ -28,4 +28,8 @@ public class ChecklistItem {
     @Builder.Default
     @Column(nullable = false)
     private Boolean isChecked = false; // 체크 여부
+
+    public void changeIsChecked(Boolean isChecked) {
+        this.isChecked = isChecked;
+    }
 }
