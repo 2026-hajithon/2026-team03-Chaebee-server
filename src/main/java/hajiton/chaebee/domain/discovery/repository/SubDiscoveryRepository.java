@@ -41,6 +41,6 @@ public interface SubDiscoveryRepository extends JpaRepository<SubDiscovery, Long
             AND d.member.id != :memberId
             """)
     List<SubDiscovery> findUnassignedSubDiscoveries(@Param("memberId") Long memberId, Pageable pageable);
+public interface SubDiscoveryRepository extends JpaRepository<SubDiscovery, Long> {
+    List<SubDiscovery> findAllByDiscoveryId(Long id);
 }
-
-

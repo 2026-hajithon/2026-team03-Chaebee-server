@@ -16,6 +16,8 @@ import java.util.Optional;
 public interface DiscoveryRepository extends JpaRepository<Discovery, Long> {
     boolean existsByTripId(Long tripId);
 
+    Optional<Discovery> findByTripId(Long tripId);
+
     @Query("SELECT d FROM Discovery d JOIN FETCH d.trip t JOIN FETCH d.member WHERE d.id = :id")
     Optional<Discovery> findWithTripAndMemberById(@Param("id") Long id);
 

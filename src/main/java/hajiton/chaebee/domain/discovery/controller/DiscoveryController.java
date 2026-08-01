@@ -3,8 +3,11 @@ package hajiton.chaebee.domain.discovery.controller;
 import hajiton.chaebee.domain.discovery.entity.SubDiscovery;
 import hajiton.chaebee.domain.dto.ApiResponse;
 import hajiton.chaebee.domain.discovery.service.DiscoveryService;
+import jakarta.validation.Valid;
 import hajiton.chaebee.domain.trip.entity.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -16,19 +19,27 @@ public class DiscoveryController {
 
     private final DiscoveryService discoveryService;
 
-    @PostMapping
-    public ApiResponse<?> createDiscovery(
-            @AuthenticationPrincipal Long memberId,
-            @RequestBody DiscoveryCreateRequest request) {
 
-        var response = discoveryService.createDiscovery(
-                memberId,
-                request.tripId(),
-                request.tripType(),
-                request.subDiscoveries()
-        );
-        return ApiResponse.success(response);
+    // 발견 등록
+    @PostMapping
+    public ResponseEntity<ApiResponse<DiscoveryRes.DiscoveryResponse>> createDiscovery(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody @Valid DiscoveryReq.CreateDiscoveryRequest request
+    ) {
+        DiscoveryRes.DiscoveryResponse response = discoveryService.createDiscovery(memberId, request);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+
+    // 타임라인 구성 (ApiResponse 적용)
+    @GetMapping("/trips/{tripId}/timeline")
+    public ResponseEntity<ApiResponse<DiscoveryRes.TimelineResponse>> getTimeline(@PathVariable Long tripId) {
+        DiscoveryRes.TimelineResponse response = discoveryService.getTimeline(tripId);
+        return ResponseEntity.ok(ApiResponse.success(response)); // 💡 여기서 한 번 감싸주기만 하면 끝!
+    }
+
+
+
 
     @GetMapping
     public ApiResponse<?> getDiscoveries(
@@ -65,4 +76,3 @@ public class DiscoveryController {
         }
     }
 }
-
