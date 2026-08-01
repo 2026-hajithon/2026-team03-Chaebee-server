@@ -2,6 +2,7 @@ package hajiton.chaebee.domain.trip.controller;
 
 import hajiton.chaebee.domain.common.dto.ApiResponse;
 import hajiton.chaebee.domain.trip.dto.TripReq;
+import hajiton.chaebee.domain.trip.dto.TripRes.TripResponse;
 import hajiton.chaebee.domain.trip.service.TripService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +25,11 @@ public class TripController {
 
     @Operation(summary = "여행 등록", description = "새로운 여행을 등록합니다.")
     @PostMapping
-    public ResponseEntity<ApiResponse<TripService.TripResponse>> createTrip(
+    public ResponseEntity<ApiResponse<TripResponse>> createTrip(
             @AuthenticationPrincipal Long memberId,
             @RequestBody TripReq.TripCreateRequest request) {
 
-        TripService.TripResponse response = tripService.createTrip(
+        TripResponse response = tripService.createTrip(
                 memberId,
                 request.countryCode(),
                 request.cityCode(),
@@ -45,25 +46,6 @@ public class TripController {
     public ResponseEntity<ApiResponse<?>> getMyTrip(@AuthenticationPrincipal Long memberId) {
         var response = tripService.getMyTrip(memberId);
         return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    @Operation(summary = "여행 상세 조회", description = "특정 여행의 상세 정보를 조회합니다.")
-    @GetMapping("/{tripId}")
-    public ResponseEntity<ApiResponse<?>> getTrip(
-            @AuthenticationPrincipal Long memberId,
-            @PathVariable Long tripId) {
-        var response = tripService.getTrip(memberId, tripId);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    @Operation(summary = "여행 수정", description = "특정 여행의 정보를 수정합니다.")
-    @PatchMapping("/{tripId}")
-    public ResponseEntity<ApiResponse<?>> updateTrip(
-            @AuthenticationPrincipal Long memberId,
-            @PathVariable Long tripId,
-            @RequestBody Object request) {
-        tripService.updateTrip(memberId, tripId, request);
-        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @Operation(summary = "여행 삭제", description = "특정 여행을 삭제합니다.")
@@ -83,5 +65,4 @@ public class TripController {
         var response = tripService.getTimeline(memberId, tripId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
-
 }

@@ -9,6 +9,8 @@ import hajiton.chaebee.domain.trip.entity.Tag;
 import hajiton.chaebee.domain.trip.entity.Trip;
 import hajiton.chaebee.domain.trip.repository.ChecklistItemRepository;
 import hajiton.chaebee.domain.trip.repository.TripRepository;
+import hajiton.chaebee.domain.trip.dto.TripRes.TripResponse;
+import hajiton.chaebee.domain.trip.dto.TripRes.ChecklistItemDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -140,28 +142,6 @@ public class TripService {
     }
 
     @Transactional(readOnly = true)
-    public TripResponse getTrip(Long memberId, Long tripId) {
-        Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new IllegalArgumentException("여행 정보가 없습니다. (TRIP_NOT_FOUND)"));
-        
-        if (!trip.getMember().getId().equals(memberId)) {
-            throw new IllegalArgumentException("조회 권한이 없습니다. (FORBIDDEN)");
-        }
-
-        long dDay = ChronoUnit.DAYS.between(LocalDateTime.now(), trip.getDepartureDate());
-        
-        return new TripResponse(
-                trip.getId(), trip.getCountryCode().name(), trip.getCityCode().name(),
-                trip.getDepartureDate(), trip.getArrivalDate(), trip.getHasEsim(), trip.getHasCash(), (int) dDay
-        );
-    }
-
-    @Transactional
-    public void updateTrip(Long memberId, Long tripId, Object request) {
-        // TODO: 요청 DTO 기반 필드 수정 로직 (날짜 변경 등)
-    }
-
-    @Transactional(readOnly = true)
     public Object getTimeline(Long memberId, Long tripId) {
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new IllegalArgumentException("TRIP_NOT_FOUND"));
         if (!trip.getMember().getId().equals(memberId)) throw new IllegalArgumentException("FORBIDDEN");
@@ -177,18 +157,4 @@ public class TripService {
                 item.getIsChecked()
         )).toList();
     }
-
-    // Response DTO
-    public record TripResponse(
-            Long tripId,
-            String countryCode,
-            String cityCode,
-            LocalDateTime departureAt,
-            LocalDateTime arrivalAt,
-            Boolean esimPlan,
-            Boolean cashPlan,
-            Integer dDay
-    ) {}
-    
-    public record ChecklistItemDto(Long checklistItemId, String tag, String title, int dDay, boolean isChecked) {}
 }
