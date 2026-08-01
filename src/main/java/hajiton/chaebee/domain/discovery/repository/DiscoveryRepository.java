@@ -26,19 +26,9 @@ public interface DiscoveryRepository extends JpaRepository<Discovery, Long> {
     Optional<Discovery> findWithTripAndMemberById(@Param("id") Long id);
 
     /**
-     * countryCode, travelType 조건 중 null이면 전체 조회 (동적 필터)
-     * Enum 타입으로 직접 받아 타입 불일치 방지
+     * 전체 조회 (최신순 등 페이징) - N+1 방지용 페치 조인
      */
-    @Query("""
-            SELECT d FROM Discovery d
-            JOIN FETCH d.trip t
-            JOIN FETCH d.member m
-            WHERE (:countryCode IS NULL OR t.countryCode = :countryCode)
-              AND (:travelType  IS NULL OR d.travelType  = :travelType)
-            """)
-    Page<Discovery> findAllByFilter(
-            @Param("countryCode") Country countryCode,
-            @Param("travelType")  TravelType travelType,
-            Pageable pageable
-    );
+    @Query(value = "SELECT d FROM Discovery d JOIN FETCH d.trip t JOIN FETCH d.member m",
+           countQuery = "SELECT count(d) FROM Discovery d")
+    Page<Discovery> findAllWithTripAndMember(Pageable pageable);
 }

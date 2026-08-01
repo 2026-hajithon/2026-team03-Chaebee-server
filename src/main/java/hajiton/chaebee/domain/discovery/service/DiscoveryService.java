@@ -106,23 +106,13 @@ public class DiscoveryService {
     }
 
     /**
-     * 발견 목록 조회 (최신순, 국가/여행유형 필터)
+     * 발견 목록 조회 (최신순)
      */
     @Transactional(readOnly = true)
-    public DiscoveryRes.DiscoveryListResponse getDiscoveries(String countryCodeStr, String tripTypeStr, int page, int size) {
-        // String -> Enum 변환 (null 또는 빈 문자열이면 null → 필터 미적용)
-        Country countryCode = (countryCodeStr != null && !countryCodeStr.isBlank())
-                ? Country.valueOf(countryCodeStr.toUpperCase()) : null;
-        TravelType travelType = (tripTypeStr != null && !tripTypeStr.isBlank())
-                ? TravelType.valueOf(tripTypeStr.toUpperCase()) : null;
-
+    public DiscoveryRes.DiscoveryListResponse getDiscoveries(int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<Discovery> discoveryPage = discoveryRepository.findAllByFilter(
-                countryCode,
-                travelType,
-                pageable
-        );
+        Page<Discovery> discoveryPage = discoveryRepository.findAllWithTripAndMember(pageable);
 
         List<DiscoveryRes.DiscoveryListItemResponse> items = discoveryPage.getContent().stream()
                 .map(d -> new DiscoveryRes.DiscoveryListItemResponse(

@@ -39,19 +39,4 @@ public class CountryController {
                 .toList();
         return ResponseEntity.ok(ApiResponse.success(result));
     }
-
-    @Operation(summary = "필수 정보 조회", description = "특정 국가의 필수 정보(여권, 비자 등)를 조회합니다.")
-    @GetMapping("/{countryCode}/essential-info")
-    public ResponseEntity<ApiResponse<?>> getEssentialInfo(@PathVariable String countryCode) {
-        Country country = Country.valueOf(countryCode);
-        CountryRes.EssentialInfoDto info = new CountryRes.EssentialInfoDto(
-                country.name(),
-                country.getPassportValidityRule(),
-                country.getVisaFreeStayDays(),
-                country.getOfficialSiteUrl(),
-                country.getLastUpdatedAt()
-        );
-        return ResponseEntity.ok(ApiResponse.success(info));
-    }
-
 }

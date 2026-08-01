@@ -2,16 +2,13 @@ package hajiton.chaebee.domain.discovery.controller;
 
 import hajiton.chaebee.domain.discovery.dto.DiscoveryReq;
 import hajiton.chaebee.domain.discovery.dto.DiscoveryRes;
-import hajiton.chaebee.domain.discovery.entity.SubDiscovery;
 import hajiton.chaebee.domain.common.dto.ApiResponse;
 import hajiton.chaebee.domain.discovery.service.DiscoveryService;
 import jakarta.validation.Valid;
-import hajiton.chaebee.domain.trip.entity.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -33,17 +30,13 @@ public class DiscoveryController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-
-
-    @Operation(summary = "발견 목록 조회", description = "조건에 맞는 발견 목록을 조회합니다.")
+    @Operation(summary = "발견 목록 조회", description = "최신순으로 발견 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<?>> getDiscoveries(
             @AuthenticationPrincipal Long memberId,
-            @RequestParam(required = false) String countryCode,
-            @RequestParam(required = false) String tripType,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        var response = discoveryService.getDiscoveries(countryCode, tripType, page, size);
+        var response = discoveryService.getDiscoveries(page, size);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -55,5 +48,4 @@ public class DiscoveryController {
         var response = discoveryService.getDiscovery(memberId, discoveryId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
-
 }
