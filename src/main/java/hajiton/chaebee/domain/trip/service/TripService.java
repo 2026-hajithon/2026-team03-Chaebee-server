@@ -155,10 +155,12 @@ public class TripService {
         // 2. 체크리스트 및 팁 데이터 조회
         List<ChecklistItem> checklists = checklistItemRepository.findAllByTripId(tripId);
 
-        java.util.Optional<hajiton.chaebee.domain.discovery.entity.Discovery> optionalDiscovery = discoveryRepository.findByTripId(tripId);
-        List<hajiton.chaebee.domain.discovery.entity.SubDiscovery> subDiscoveries = optionalDiscovery
-                .map(discovery -> subDiscoveryRepository.findByDiscoveryId(discovery.getId()))
-                .orElse(java.util.Collections.emptyList());
+        // 해당 국가의 체크리스트 태그마다 가장 최신의 꿀팁 1개씩 로드
+        List<hajiton.chaebee.domain.discovery.entity.SubDiscovery> subDiscoveries = new java.util.ArrayList<>();
+        for (ChecklistItem item : checklists) {
+            subDiscoveryRepository.findFirstByDiscoveryTripCountryCodeAndTagOrderByCreatedAtDesc(country, item.getTag())
+                    .ifPresent(subDiscoveries::add);
+        }
 
         // 3. 상단 헤더 (TripInfo) 조립
         int totalChecklists = checklists.size();

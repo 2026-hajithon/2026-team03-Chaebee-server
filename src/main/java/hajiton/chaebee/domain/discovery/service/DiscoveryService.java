@@ -154,7 +154,7 @@ public class DiscoveryService {
 
     /**
      * 발견 상세 조회
-     */
+     *//*
     @Transactional(readOnly = true)
     public DiscoveryRes.DiscoveryResponse getDiscovery(Long memberId, Long discoveryId) {
         Discovery discovery = discoveryRepository.findWithTripAndMemberById(discoveryId)
@@ -184,7 +184,9 @@ public class DiscoveryService {
                 discovery.getCreatedAt(),
                 subDiscoveryResponses
         );
-    }
+    }*/
+
+            
     // 타임라인 카드 한 번에 몇 개까지 보여줄지. 국가+태그 조합마다 팁이 많이 쌓일 수 있어서
     // 전체 목록이 아니라 최신순 상위 N개만 잘라서 카드로 노출.
     private static final int TIMELINE_CARD_LIMIT = 5;
