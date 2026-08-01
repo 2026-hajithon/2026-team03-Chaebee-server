@@ -29,6 +29,22 @@ public class DiscoveryRes {
             String content
     ) {}
 
+    public record DiscoveryListResponse(
+            List<DiscoveryListItemResponse> content,
+            long totalElements,
+            int totalPages,
+            int currentPage
+    ) {}
+
+    public record DiscoveryListItemResponse(
+            Long discoveryId,
+            String countryCode,
+            String cityCode,
+            String tripType,
+            String authorName,
+            LocalDateTime createdAt
+    ) {}
+
 
     // ==========================================
     public record TimelineResponse(

@@ -109,7 +109,7 @@ public class DiscoveryService {
      * 발견 목록 조회 (최신순, 국가/여행유형 필터)
      */
     @Transactional(readOnly = true)
-    public DiscoveryListResponse getDiscoveries(String countryCodeStr, String tripTypeStr, int page, int size) {
+    public DiscoveryRes.DiscoveryListResponse getDiscoveries(String countryCodeStr, String tripTypeStr, int page, int size) {
         // String -> Enum 변환 (null 또는 빈 문자열이면 null → 필터 미적용)
         Country countryCode = (countryCodeStr != null && !countryCodeStr.isBlank())
                 ? Country.valueOf(countryCodeStr.toUpperCase()) : null;
@@ -124,8 +124,8 @@ public class DiscoveryService {
                 pageable
         );
 
-        List<DiscoveryListItemResponse> items = discoveryPage.getContent().stream()
-                .map(d -> new DiscoveryListItemResponse(
+        List<DiscoveryRes.DiscoveryListItemResponse> items = discoveryPage.getContent().stream()
+                .map(d -> new DiscoveryRes.DiscoveryListItemResponse(
                         d.getId(),
                         d.getTrip().getCountryCode().name(),
                         d.getTrip().getCityCode().name(),
@@ -135,7 +135,7 @@ public class DiscoveryService {
                 ))
                 .collect(Collectors.toList());
 
-        return new DiscoveryListResponse(
+        return new DiscoveryRes.DiscoveryListResponse(
                 items,
                 discoveryPage.getTotalElements(),
                 discoveryPage.getTotalPages(),
@@ -147,7 +147,7 @@ public class DiscoveryService {
      * 발견 상세 조회
      */
     @Transactional(readOnly = true)
-    public DiscoveryResponse getDiscovery(Long memberId, Long discoveryId) {
+    public DiscoveryRes.DiscoveryResponse getDiscovery(Long memberId, Long discoveryId) {
         Discovery discovery = discoveryRepository.findWithTripAndMemberById(discoveryId)
                 .orElseThrow(() -> new IllegalArgumentException("발견 정보가 없습니다. (NOT_FOUND)"));
 
@@ -156,22 +156,22 @@ public class DiscoveryService {
 
         List<SubDiscovery> subDiscoveries = subDiscoveryRepository.findByDiscoveryId(discoveryId);
 
-        List<SubDiscoveryResponse> subDiscoveryResponses = subDiscoveries.stream()
-                .map(sub -> new SubDiscoveryResponse(
+        List<DiscoveryRes.SubDiscoveryResponse> subDiscoveryResponses = subDiscoveries.stream()
+                .map(sub -> new DiscoveryRes.SubDiscoveryResponse(
                         sub.getId(),
-                        sub.getTag().name(),
+                        sub.getTag(),
                         sub.getContent()
                 ))
                 .collect(Collectors.toList());
 
         Trip trip = discovery.getTrip();
 
-        return new DiscoveryResponse(
+        return new DiscoveryRes.DiscoveryResponse(
                 discovery.getId(),
                 trip.getId(),
                 trip.getCountryCode().name(),
                 trip.getCityCode().name(),
-                discovery.getTravelType().name(),
+                discovery.getTravelType(),
                 discovery.getCreatedAt(),
                 subDiscoveryResponses
         );
@@ -247,7 +247,7 @@ public class DiscoveryService {
 
         Optional<Discovery> optionalDiscovery = discoveryRepository.findByTripId(tripId);
         List<SubDiscovery> subDiscoveries = optionalDiscovery
-                .map(discovery -> subDiscoveryRepository.findAllByDiscoveryId(discovery.getId()))
+                .map(discovery -> subDiscoveryRepository.findByDiscoveryId(discovery.getId()))
                 .orElse(Collections.emptyList());
 
         log.debug("조회된 체크리스트 수: {}, 서브 발견 수: {}", checklists.size(), subDiscoveries.size());
