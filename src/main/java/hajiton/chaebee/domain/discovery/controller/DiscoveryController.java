@@ -20,7 +20,7 @@ public class DiscoveryController {
     private final DiscoveryService discoveryService;
 
 
-    //발견 등록
+    // 발견 등록
     @PostMapping
     public ResponseEntity<ApiResponse<DiscoveryRes.DiscoveryResponse>> createDiscovery(
             @AuthenticationPrincipal Long memberId,
@@ -31,11 +31,11 @@ public class DiscoveryController {
     }
 
 
-    //타임라인 구성
+    // 타임라인 구성 (ApiResponse 적용)
     @GetMapping("/trips/{tripId}/timeline")
-    public ResponseEntity<DiscoveryRes.TimelineResponse> getTimeline(@PathVariable Long tripId) {
+    public ResponseEntity<ApiResponse<DiscoveryRes.TimelineResponse>> getTimeline(@PathVariable Long tripId) {
         DiscoveryRes.TimelineResponse response = discoveryService.getTimeline(tripId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response)); // 💡 여기서 한 번 감싸주기만 하면 끝!
     }
 
 
@@ -60,5 +60,5 @@ public class DiscoveryController {
         return ApiResponse.success(null);
     }
 
-    public record DiscoveryCreateRequest(Long tripId, String tripType, List<DiscoveryService.SubDiscoveryRequest> subDiscoveries) {}
+//    public record DiscoveryCreateRequest(Long tripId, String tripType, List<DiscoveryService.SubDiscoveryRequest> subDiscoveries) {}
 }
