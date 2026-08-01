@@ -9,6 +9,9 @@ import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import hajiton.chaebee.domain.discovery.entity.SubDiscovery;
+
 public class DiscoveryRes {
 
     private DiscoveryRes() {
@@ -32,6 +35,21 @@ public class DiscoveryRes {
             @Schema(description = "태그", example = "FOOD") Tag tag,
             @Schema(description = "내용", example = "맛집 발견!") String content
     ) {}
+
+    @Schema(description = "서브 발견 타임라인 카드 DTO")
+    public record SubDiscoveryCardResponse(
+            @Schema(description = "서브 발견 ID", example = "1") Long subDiscoveryId,
+            @Schema(description = "태그", example = "FOOD") Tag tag,
+            @Schema(description = "내용", example = "맛집 발견!") String content
+    ) {
+        public static SubDiscoveryCardResponse from(SubDiscovery subDiscovery) {
+            return new SubDiscoveryCardResponse(
+                    subDiscovery.getId(),
+                    subDiscovery.getTag(),
+                    subDiscovery.getContent()
+            );
+        }
+    }
 
     @Schema(description = "발견 목록 응답 DTO")
     public record DiscoveryListResponse(

@@ -1,6 +1,7 @@
 package hajiton.chaebee.domain.trip.controller;
 
-import hajiton.chaebee.domain.dto.ApiResponse;
+import hajiton.chaebee.domain.common.dto.ApiResponse;
+import hajiton.chaebee.domain.trip.dto.ChecklistReq;
 import hajiton.chaebee.domain.trip.service.ChecklistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,16 +25,11 @@ public class ChecklistController {
     public ApiResponse<?> updateChecklistItem(
             @AuthenticationPrincipal Long memberId,
             @PathVariable Long checklistItemId,
-            @RequestBody UpdateChecklistRequest request) {
+            @RequestBody ChecklistReq.UpdateChecklistRequest request) {
 
         checklistService.updateChecklistItem(memberId, checklistItemId, request.isChecked());
 
         return ApiResponse.success(null);
     }
 
-    @Schema(description = "체크리스트 업데이트 요청 DTO")
-    public record UpdateChecklistRequest(
-            @Schema(description = "체크 여부", example = "true")
-            Boolean isChecked
-    ) {}
 }

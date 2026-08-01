@@ -188,7 +188,7 @@ public class DiscoveryService {
      * countryCode, tag 둘 다 선택 파라미터 — null이면 해당 조건 없이 전체에서 조회.
      */
     @Transactional(readOnly = true)
-    public List<DiscoveryController.SubDiscoveryCardResponse> getSubDiscoveriesForTimeline(String countryCode, Tag tag) {
+    public List<DiscoveryRes.SubDiscoveryCardResponse> getSubDiscoveriesForTimeline(String countryCode, Tag tag) {
         Specification<SubDiscovery> spec = Specification
                 .where(SubDiscoverySpecs.countryCodeEquals(countryCode))
                 .and(SubDiscoverySpecs.tagEquals(tag));
@@ -196,7 +196,7 @@ public class DiscoveryService {
         Pageable pageable = PageRequest.of(0, TIMELINE_CARD_LIMIT, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         return subDiscoveryRepository.findAll(spec, pageable)
-                .map(DiscoveryController.SubDiscoveryCardResponse::from)
+                .map(DiscoveryRes.SubDiscoveryCardResponse::from)
                 .getContent();
     }
 
