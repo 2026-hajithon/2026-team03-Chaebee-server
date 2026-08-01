@@ -22,4 +22,7 @@ public class Member {
 
     @Column(length = 255)
     private String providerId; // 제공자별 고유 id
+
+    @Column(length = 255)
+    private String email; // 이메일
 }

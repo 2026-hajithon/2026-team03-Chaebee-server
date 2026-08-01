@@ -27,12 +27,16 @@ public class MemberServiceImpl implements MemberService {
                 request.provider(), request.providerToken() != null);
 
         String providerId;
+        String email = null;
         String name = "채비유저";
         boolean isGuest = "GUEST".equals(request.provider());
 
         // 1. Provider에 따른 토큰 검증 분기 처리
         if ("GOOGLE".equals(request.provider())) {
-            providerId = googleTokenVerifier.verify(request.providerToken());
+            var userInfo = googleTokenVerifier.verify(request.providerToken());
+            providerId = userInfo.providerId();
+            email = userInfo.email();
+            name = userInfo.name() != null ? userInfo.name() : name;
             log.info("[구글 토큰 검증 성공] providerId: {}", providerId);
         } else if (isGuest) {
             providerId = null;
@@ -54,6 +58,7 @@ public class MemberServiceImpl implements MemberService {
                 log.info("[구글 신규 회원가입 진행] provider: {}, providerId: {}", request.provider(), providerId);
                 member = Member.builder()
                         .name(name)
+                        .email(email)
                         .provider(request.provider())
                         .providerId(providerId)
                         .build();
@@ -82,6 +87,7 @@ public class MemberServiceImpl implements MemberService {
         return MemberRes.Login.builder()
                 .memberId(memberId)
                 .name(member.getName())
+                .email(member.getEmail())
                 .isGuest(isGuest)
                 .isNewMember(isNewMember)
                 .accessToken(accessToken)

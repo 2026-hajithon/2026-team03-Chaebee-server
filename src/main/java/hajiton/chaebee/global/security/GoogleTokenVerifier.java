@@ -25,14 +25,21 @@ public class GoogleTokenVerifier {
                 .build();
     }
 
-    /** @return 구글 고유 사용자 ID (providerId로 사용) */
-    public String verify(String idTokenString) {
+    public record GoogleUserInfo(String providerId, String email, String name) {}
+
+    /** @return 구글 유저 정보 (providerId, email, name) */
+    public GoogleUserInfo verify(String idTokenString) {
         try {
             GoogleIdToken idToken = verifier.verify(idTokenString);
             if (idToken == null) {
                 throw new ProjectException(MemberErrorCode.INVALID_PROVIDER_TOKEN);
             }
-            return idToken.getPayload().getSubject();
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            return new GoogleUserInfo(
+                payload.getSubject(),
+                payload.getEmail(),
+                (String) payload.get("name")
+            );
         } catch (Exception e) {
             throw new ProjectException(MemberErrorCode.INVALID_PROVIDER_TOKEN);
         }

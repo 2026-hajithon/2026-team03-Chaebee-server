@@ -18,6 +18,9 @@ public class MemberRes {
             @Schema(description = "이름/닉네임", example = "채비유저")
             String name,
             
+            @Schema(description = "회원 이메일", example = "chaebee@gmail.com")
+            String email,
+            
             @Schema(description = "게스트 여부", example = "false")
             Boolean isGuest,
             
