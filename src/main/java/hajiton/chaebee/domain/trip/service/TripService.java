@@ -134,7 +134,7 @@ public class TripService {
                 discoveryAssignmentRepository.deleteBySubDiscoveryIdIn(subDiscoveryIds);
                 subDiscoveryRepository.deleteByDiscoveryId(discovery.getId());
             }
-            discoveryRepository.deleteByTripId(tripId);
+            discoveryRepository.delete(discovery); // <--- 수정한 부분: 조회해온 엔티티를 직접 삭제
         });
 
         // 3. Trip 삭제
